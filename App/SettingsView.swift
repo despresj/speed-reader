@@ -125,6 +125,7 @@ struct SettingsView: View {
                         .foregroundStyle(Color.readingForeground)
                     Text("\(band.wpm) wpm")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .monospacedDigit()
                         .foregroundStyle(Color.readingMuted)
                 }
                 .frame(width: 74)

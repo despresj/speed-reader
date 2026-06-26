@@ -70,11 +70,11 @@ struct AIFeaturesView: View {
                             .autocorrectionDisabled()
                             .font(.system(size: 15, design: .monospaced))
                         HStack(spacing: 12) {
-                            Button("Save Key") {
+                            Button("Save key") {
                                 guard !draftKey.isEmpty else { return }
                                 try? service.saveKey(draftKey); draftKey = ""; status = "Key saved."
                             }.buttonStyle(PrimaryPillStyle())
-                            Button(testing ? "Testing…" : "Test Key") { Task { await test() } }
+                            Button(testing ? "Testing…" : "Test key") { Task { await test() } }
                                 .buttonStyle(SecondaryPillStyle())
                                 .disabled(testing || draftKey.isEmpty)
                         }

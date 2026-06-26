@@ -727,7 +727,7 @@ struct ReadingView: View {
 
     @ViewBuilder
     private func controlZone(width: CGFloat) -> some View {
-        if viewModel.state != .completed && viewModel.state != .paused {
+        if viewModel.state != .completed {
             HStack(spacing: 0) {
                 if !leftHanded { Spacer(minLength: 0) }
                 ZStack {
@@ -768,6 +768,13 @@ struct ReadingView: View {
                 if leftHanded { Spacer(minLength: 0) }
             }
             .animation(.easeOut(duration: 0.2), value: isHolding)
+            // While paused the Threadline is the focus, so the gauge steps aside —
+            // but *fade* it out rather than unmounting it. Structurally dropping the
+            // dial on every release (and remounting on the next hold) blinked the
+            // whole instrument in and out — the start/stop jank. Kept mounted and
+            // driven by opacity, a hold→release→hold cycle now cross-fades smoothly.
+            .opacity(viewModel.state == .paused ? 0 : 1)
+            .animation(.easeOut(duration: 0.2), value: viewModel.state)
             // Purely a visual rail now: the SpeedDial + tint. All touches fall
             // through to `readingSurfaceGestureLayer` beneath, which decides whether
             // a rail-started gesture steers. Never intercepts, so it can't shadow the
@@ -1482,6 +1489,13 @@ private struct SpeedDial: View {
 
                 readout(hub: hub, radius: radius)
             }
+            // Ease the lit↔dim swap (arc + needle color, stroke weight, glow) when a
+            // hold engages or releases. The hub cap already animated on `isActive`,
+            // but the arc/needle/glow only animated on `index` — so starting and
+            // stopping a read snapped the gauge's color and glow on and off out of
+            // step with the hub. Warming the whole instrument up and back down on the
+            // same curve removes that pop.
+            .animation(.easeOut(duration: 0.2), value: isActive)
         }
         // A compact instrument — roughly 40% smaller than before — so it reads as
         // a supporting speed gauge near the thumb, not the app's headline feature.

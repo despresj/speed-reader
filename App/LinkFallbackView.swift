@@ -54,7 +54,7 @@ struct LinkFallbackView: View {
     /// out to the paste screen. Kept low on the surface, within reach.
     private var actions: some View {
         VStack(spacing: 12) {
-            Button("Open Link") {
+            Button("Open link") {
                 if let link = viewModel.pendingLink, let url = URL(string: link) {
                     openURL(url)
                 }
@@ -62,7 +62,7 @@ struct LinkFallbackView: View {
             }
             .buttonStyle(PrimaryPillStyle())
 
-            Button("Copy Link") {
+            Button("Copy link") {
                 viewModel.copyLink()
             }
             .buttonStyle(SecondaryPillStyle())
