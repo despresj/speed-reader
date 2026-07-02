@@ -213,16 +213,17 @@ struct ReadingCanvas: View {
 
 // MARK: - Button styles
 
-/// Filled accent pill with a soft glow and a gentle press-in.
+/// Filled ink pill — high-contrast editorial primary. The accent is reserved for
+/// the thread (your place in the text), so primary actions wear ink instead:
+/// black pill/white text on paper, white pill/ink text at night. Flat — no glow.
 struct PrimaryPillStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(Color.readingOnAccent)
+            .foregroundStyle(Color.readingBackground)
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
-            .background(Color.readingAccent, in: Capsule())
-            .shadow(color: .readingAccent.opacity(0.35), radius: 18, y: 6)
+            .background(Color.readingForeground, in: Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7),
@@ -231,10 +232,9 @@ struct PrimaryPillStyle: ButtonStyle {
 }
 
 /// Optional-action pill for the post-read comprehension check. Secondary weight —
-/// the same dark surface as `SecondaryPillStyle` — but carries a subtle amber
-/// accent via its border so it reads as offered, not pushed. The filled amber
-/// `PrimaryPillStyle` is reserved for primary reading actions; an optional check
-/// must never compete with "You finished."
+/// the same quiet surface + hairline as `SecondaryPillStyle`. The accent no longer
+/// marks chrome; the row's small checkmark icon carries the only color. An optional
+/// check must never compete with "You finished."
 struct ComprehensionPillStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -242,7 +242,7 @@ struct ComprehensionPillStyle: ButtonStyle {
             .padding(.horizontal, 22)
             .frame(maxWidth: .infinity)
             .background(Color.readingSurface, in: Capsule())
-            .overlay(Capsule().stroke(Color.readingAccent.opacity(0.45), lineWidth: 1))
+            .overlay(Capsule().stroke(Color.readingBorder, lineWidth: 1))
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7),
