@@ -17,7 +17,7 @@ struct LinkFallbackView: View {
 
                 VStack(spacing: 14) {
                     Text("Link received")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 28, weight: .bold, design: .serif))
                         .foregroundStyle(Color.readingForeground)
 
                     Text(viewModel.pendingLink ?? "")

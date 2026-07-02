@@ -66,7 +66,7 @@ struct SettingsView: View {
     private var header: some View {
         HStack {
             Text("Settings")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
             Spacer()
             Button("Done") { dismiss() }

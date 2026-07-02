@@ -150,12 +150,12 @@ struct PasteView: View {
     private var header: some View {
         VStack(spacing: 14) {
             Text("Skim")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold, design: .serif))
                 .tracking(4)
                 .foregroundStyle(Color.readingMuted)
 
             Text("Read faster without losing the thread.")
-                .font(.system(size: 30, weight: .bold))
+                .font(.system(size: 30, weight: .bold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
                 .multilineTextAlignment(.center)
                 .lineSpacing(2)

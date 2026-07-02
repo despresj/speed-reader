@@ -103,7 +103,7 @@ struct ResumeView: View {
                 .tracking(3)
                 .foregroundStyle(Color.readingMuted)
             Text("Pick up where you left off")
-                .font(.system(size: 24, weight: .bold))
+                .font(.system(size: 24, weight: .bold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
                 .multilineTextAlignment(.center)
         }

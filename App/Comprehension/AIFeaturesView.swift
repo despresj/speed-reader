@@ -18,7 +18,7 @@ struct AIFeaturesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     Text("AI Comprehension Checks")
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(.system(size: 22, weight: .semibold, design: .serif))
                         .foregroundStyle(Color.readingForeground)
 
                     Text("Use your own OpenAI API key to generate optional comprehension "

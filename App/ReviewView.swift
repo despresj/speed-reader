@@ -34,7 +34,7 @@ struct ReviewView: View {
     private var header: some View {
         VStack(spacing: 8) {
             Text("Done")
-                .font(.system(size: 30, weight: .semibold))
+                .font(.system(size: 30, weight: .semibold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
             Text(metaLine)
                 .font(.system(size: 14, weight: .medium))

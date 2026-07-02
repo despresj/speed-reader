@@ -55,7 +55,7 @@ struct IdeasView: View {
     private var header: some View {
         HStack {
             Text("Ideas")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
             Spacer()
             Button("Done") { dismiss() }

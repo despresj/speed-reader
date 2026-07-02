@@ -49,7 +49,7 @@ struct ComprehensionCheckView: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.readingMuted)
                 Text(q.question)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 20, weight: .semibold, design: .serif))
                     .foregroundStyle(Color.readingForeground)
                 ForEach(ChoiceKey.allCases, id: \.self) { key in
                     choiceButton(key, q: q)
@@ -109,7 +109,7 @@ struct ComprehensionCheckView: View {
         if let r = model.result {
             VStack(spacing: 16) {
                 Text("\(r.correct) / \(r.scored)")
-                    .font(.system(size: 34, weight: .bold))
+                    .font(.system(size: 34, weight: .bold, design: .serif))
                     .foregroundStyle(Color.readingForeground).monospacedDigit()
                 Text(r.headline).font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.readingForeground)

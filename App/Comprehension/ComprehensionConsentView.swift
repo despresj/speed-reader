@@ -11,7 +11,7 @@ struct ComprehensionConsentView: View {
             ReadingCanvas()
             VStack(alignment: .leading, spacing: 18) {
                 Text("Comprehension checks")
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 22, weight: .semibold, design: .serif))
                     .foregroundStyle(Color.readingForeground)
                 Text("Comprehension checks send this read's text to OpenAI using your API key. "
                     + "Because pre-generation runs when you load text, the text may be sent as "
