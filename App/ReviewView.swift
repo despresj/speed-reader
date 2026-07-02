@@ -3,12 +3,15 @@ import SwiftUI
 /// The calm end-of-read screen. Reaching the final word shouldn't dump you on a
 /// lone stranded word — it settles here: a quiet "Done", the full text back in a
 /// readable scroll so you can review or reread by eye, and two thumb-range
-/// actions. No celebration, no score; the same warm, dim reading-by-lamplight
-/// surface as everywhere else.
+/// actions. No celebration, no score; the same calm ink-and-paper surface as
+/// everywhere else.
 struct ReviewView: View {
     let viewModel: ReaderViewModel
 
     @State private var showingCheck = false
+    /// Drives the completion moment: the vermillion thread under "Done" draws to
+    /// full width once, on arrival.
+    @State private var threadDrawn = false
 
     var body: some View {
         ZStack {
@@ -36,12 +39,24 @@ struct ReviewView: View {
             Text("Done")
                 .font(.system(size: 30, weight: .semibold, design: .serif))
                 .foregroundStyle(Color.readingForeground)
+            // The thread, pulled all the way through — a small spring-drawn line,
+            // the only celebration this screen allows itself.
+            Capsule()
+                .fill(Color.readingAccent)
+                .frame(width: 64, height: 2)
+                .scaleEffect(x: threadDrawn ? 1 : 0.02, anchor: .leading)
+                .opacity(threadDrawn ? 1 : 0)
             Text(metaLine)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.readingMuted)
                 .monospacedDigit()
         }
         .frame(maxWidth: .infinity)
+        .onAppear {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.15)) {
+                threadDrawn = true
+            }
+        }
     }
 
     /// Word count plus an honest read-time estimate at the speed it finished on —

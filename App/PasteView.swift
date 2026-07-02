@@ -49,6 +49,9 @@ struct PasteView: View {
             }
             .padding(.horizontal, 28)
             .padding(.bottom, 8)
+            // Owns the estimate pill's entrance: a gentle spring up from the
+            // bottom band, not a plain fade.
+            .animation(.spring(response: 0.35, dampingFraction: 0.75), value: estimate)
         }
         // Reads is home; New Text is a create-flow reached from it. When we arrived
         // here from Reads, a "‹ Reads" button (the word, not a bare chevron, so the
@@ -242,8 +245,7 @@ struct PasteView: View {
             .padding(.vertical, 9)
             .background(Color.readingSurface.opacity(0.6), in: Capsule())
             .overlay(Capsule().stroke(Color.readingBorder, lineWidth: 1))
-            .transition(.opacity)
-            .animation(.easeOut(duration: 0.2), value: estimate)
+            .transition(.scale(scale: 0.9, anchor: .bottom).combined(with: .opacity))
         }
     }
 }
