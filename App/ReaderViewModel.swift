@@ -269,7 +269,7 @@ final class ReaderViewModel {
     var wpm: Int { Int(band.rawValue) }
 
     /// Reading "temperature" of the current band, 0 (calm/slow) → 1 (warm/fast).
-    /// Drives the speed-responsive amber accents on the reading surface — the
+    /// Drives the speed-responsive vermillion accents on the reading surface — the
     /// background glow, dial, pivot letter, and progress bar all warm as you
     /// throttle up. Updates reactively whenever the band changes.
     var speedWarmth: Double { band.warmth }

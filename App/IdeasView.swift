@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The Ideas scratchpad: a calm sheet for jotting improvement ideas, bugs, and
-/// friction noticed while actually reading. Same warm reading-by-lamplight
+/// friction noticed while actually reading. Same calm ink-and-paper
 /// surface as the rest of Skim — input at the top so a thought lands in one tap
 /// and a keystroke, the running list of open ideas below, newest first. Not a
 /// project tool: add, glance, check off, or swipe away. Private and local.

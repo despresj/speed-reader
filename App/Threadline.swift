@@ -3,7 +3,7 @@ import UIKit
 
 /// The paused "where am I" surface. When the reader rests, the foot of the screen
 /// shows a calm, natively scrollable window of the surrounding prose — the active
-/// word in amber, the current sentence in full ink, the rest dimmer — so you can
+/// word in vermillion, the current sentence in full ink, the rest dimmer — so you can
 /// inspect where you are without leaving the reading surface.
 ///
 /// Native momentum is the whole point: the `UITextView` owns its own pan, so the
@@ -96,7 +96,7 @@ private struct ThreadlineTextView: UIViewRepresentable {
     }
 
     // Three legibility tiers: surrounding text dim but readable, the current
-    // sentence full ink as the "you are here" line, the active word amber on top.
+    // sentence full ink as the "you are here" line, the active word vermillion on top.
     private static let surroundColor = UIColor(Color.readingForeground).withAlphaComponent(0.55)
     private static let sentenceColor = UIColor(Color.readingForeground)
     private static let activeColor = UIColor(Color.readingAccent)
@@ -289,7 +289,7 @@ private struct ThreadlineTextView: UIViewRepresentable {
         let keyChanged = recenterKey != coord.lastRecenterKey
 
         // Highlight follows the active token every time it changes — independent of
-        // scrolling, so the amber word is always correct even mid-scroll.
+        // scrolling, so the vermillion word is always correct even mid-scroll.
         if indexChanged {
             let sentence = sentenceRange(activeIndex: activeIndex, map: coord.map)
             let storage = textView.textStorage

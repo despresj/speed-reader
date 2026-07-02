@@ -4,7 +4,7 @@ import SwiftUI
 /// copied and there's a read to pick up. Leads with the last read — one tap to
 /// continue exactly where you stopped — with the rest of your recent reads listed
 /// below to jump back into, and a quiet way out to read something new. Same warm
-/// reading-by-lamplight surface as everywhere else; this is a calm shelf, not a
+/// ink-and-paper surface as everywhere else; this is a calm shelf, not a
 /// file manager.
 struct ResumeView: View {
     let viewModel: ReaderViewModel

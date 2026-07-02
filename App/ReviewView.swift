@@ -97,7 +97,7 @@ struct ReviewView: View {
 
     // MARK: Comprehension — an optional, de-emphasized affordance
 
-    /// The check sits above the navigation actions but never wears the filled amber
+    /// The check sits above the navigation actions but never wears the filled ink
     /// primary style — finishing a read is the moment; verifying the thread is an
     /// offer. Shown only when a check is possible for this read.
     @ViewBuilder

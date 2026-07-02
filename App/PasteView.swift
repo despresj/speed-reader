@@ -226,7 +226,7 @@ struct PasteView: View {
     /// text to read — sitting in the calm bottom band the reading-hand picker used to
     /// occupy (that's a set-once preference, so it lives in Settings now, not on the
     /// launcher). Time, not word count, is the user-facing unit: a muted "Estimated
-    /// read" label with the time itself in the warm accent. Premium and unobtrusive —
+    /// read" label with the time itself in the thread accent. Premium and unobtrusive —
     /// never debug metadata — and absent entirely until the field has usable text.
     @ViewBuilder
     private var estimatePill: some View {

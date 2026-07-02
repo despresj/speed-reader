@@ -152,7 +152,7 @@ struct ReadingView: View {
         }
     }
 
-    /// The dial's lit (amber, engaged) look: on while actually reading — a precision
+    /// The dial's lit (vermillion, engaged) look: on while actually reading — a precision
     /// hold or cruise — and while the thumb is turning the dial; dim and calm at rest.
     private var dialIsActive: Bool { gaugeState != .paused || adjustingSpeed }
 
@@ -1234,7 +1234,7 @@ private extension HorizontalAlignment {
 }
 
 /// One RSVP word laid out around its Optimal Recognition Point. The pivot letter
-/// (`ORP.split`) is painted in the amber accent and its *center* is locked to a
+/// (`ORP.split`) is painted in the vermillion accent and its *center* is locked to a
 /// fixed x, so the eye holds one unmoving spot while `before`/`after` flow out to
 /// the sides. For ordinary words the lock is geometric and total — a custom
 /// alignment guide marks the pivot's center and a fixed-width frame pins it, so
@@ -1259,8 +1259,8 @@ private struct PivotWord: View {
     let anchorX: CGFloat
     /// Full container (screen) width, so the fit can respect the trailing margin.
     let containerWidth: CGFloat
-    /// Speed warmth (0…1): the focal ORP letter heats from calm gold toward a
-    /// golden amber as pace climbs — soft when slow, more energized when fast.
+    /// Speed warmth (0…1): the focal ORP letter heats from calm vermillion toward a
+    /// hotter orange as pace climbs — soft when slow, more energized when fast.
     var warmth: Double = 0
 
     // Large, rounded, and solidly weighted for a crisp, high-contrast focal word
@@ -1354,7 +1354,7 @@ enum GaugeState {
     /// identical fonts, slots, and baselines — over a warmed (lit) dial. Hold is the
     /// clutch, not a named mode, so it is never labelled.
     case manual
-    /// Hands-free cruise: a quiet, engaged gauge — needle + lit arc + a thin amber
+    /// Hands-free cruise: a quiet, engaged gauge — needle + lit arc + a thin vermillion
     /// ring carry "locked, hands-free"; the text readout steps away (no "Cruise"
     /// word) and only re-reveals the WPM briefly while the speed is being adjusted.
     case cruise
@@ -1368,7 +1368,7 @@ enum GaugeState {
 /// the haptic click. It reads three states (`GaugeState`): *paused* — dim dial with
 /// the full band + WPM spelled out; *manual* (hold-to-read) — the same band + WPM
 /// grid in the same slots, warmed by a lit dial (no reflow, no "Hold" word); and
-/// *cruise* — a quiet engaged gauge (lit needle/arc + a thin amber ring) with the
+/// *cruise* — a quiet engaged gauge (lit needle/arc + a thin vermillion ring) with the
 /// text readout hidden, surfacing the WPM only while the speed is being adjusted.
 /// Mirrors to the opposite edge for a left-hand grip.
 ///
@@ -1387,7 +1387,7 @@ private struct SpeedDial: View {
     /// gauge. Ignored in paused/manual, which always show the readout.
     var revealReadout: Bool = false
     /// Speed warmth (0…1): the lit arc, needle, hub, and ticks warm from calm
-    /// gold toward hot amber, and the needle's glow swells — calm at Study, alive
+    /// vermillion toward hot orange, and the needle's glow swells — calm at Study, alive
     /// at Blast, never an alarm.
     var warmth: Double = 0
     let leftHanded: Bool
@@ -1429,7 +1429,7 @@ private struct SpeedDial: View {
                               y: geo.size.height / 2)
 
             ZStack {
-                // Cruise "engaged" ring: a thin amber arc hugging the *outside* of
+                // Cruise "engaged" ring: a thin vermillion arc hugging the *outside* of
                 // the gauge, shown only in cruise, with a soft glow — a quiet "locked,
                 // hands-free" mark that belongs to the instrument, never an alarm.
                 if state == .cruise {
@@ -1511,7 +1511,7 @@ private struct SpeedDial: View {
     /// *Paused* and *manual* (hold-to-read) render the **identical** grid — same band
     /// + WPM + "wpm", same fonts, same slots, same baselines — so warming from rest to
     /// an active hold never shifts a digit or reflows a line; only the *dial* warms
-    /// (lit arc, brighter needle, hotter amber via `isActive`/`glowScale`). Hold is a
+    /// (lit arc, brighter needle, hotter orange via `isActive`/`glowScale`). Hold is a
     /// clutch, never a named mode, so it carries no state word. *Cruise* hides the
     /// readout entirely — the needle, lit arc, and engaged ring say "locked,
     /// hands-free" — and only re-reveals the WPM, in that same locked grid, while the
@@ -1669,7 +1669,7 @@ private struct NavFlashLabel: View {
 /// Subtle bottom progress line.
 private struct ProgressLine: View {
     let progress: Double
-    /// Speed warmth (0…1): the fill warms toward hot amber and lifts slightly in
+    /// Speed warmth (0…1): the fill warms toward hot orange and lifts slightly in
     /// presence as pace climbs, keeping the foot of the screen in step with the
     /// rest of the accent family.
     var warmth: Double = 0
@@ -1678,7 +1678,7 @@ private struct ProgressLine: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.readingForeground.opacity(0.09))
-                // Brighter, slightly more present amber fill so progress reads
+                // Brighter, slightly more present vermillion fill so progress reads
                 // clearly without ever shouting — still tertiary to the word.
                 Capsule()
                     .fill(Color.readingAccent(warmth: warmth).opacity(0.72 + warmth * 0.22))

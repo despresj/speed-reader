@@ -20,7 +20,7 @@ struct SettingsGear: View {
 }
 
 /// Set-once reading preferences: which hand drives the rail, the speed a fresh read
-/// opens at, and whether reading begins hands-free. Same warm reading-by-lamplight
+/// opens at, and whether reading begins hands-free. Same calm ink-and-paper
 /// surface as the rest of Skim. Everything here is a *default for new reads* — a
 /// loaded read's live speed and hand still move freely; these just set the start.
 struct SettingsView: View {
