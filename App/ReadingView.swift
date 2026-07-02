@@ -294,7 +294,7 @@ struct ReadingView: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .semibold))
                 Text("Reads")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
             }
             .foregroundStyle(Color.readingMuted)
             .padding(.leading, 11)
@@ -338,7 +338,7 @@ struct ReadingView: View {
                 Image(systemName: "checkmark")
                     .font(.system(size: 12, weight: .bold))
                 Text("Copied")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(Color.readingForeground)
             .padding(.horizontal, 14)
@@ -561,7 +561,7 @@ struct ReadingView: View {
                         .font(.system(size: 15, weight: .semibold))
                     if recenterExpanded {
                         Text("Current word")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .font(.system(size: 14, weight: .medium))
                             .fixedSize()
                             .transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
@@ -1082,7 +1082,7 @@ private struct GestureHintsOverlay: View {
 
             VStack(spacing: 0) {
                 Text("Gestures")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(.system(size: 13, weight: .semibold))
                     .tracking(3)
                     .foregroundStyle(Color.readingMuted)
                     .padding(.bottom, 20)
@@ -1095,7 +1095,7 @@ private struct GestureHintsOverlay: View {
                                 .foregroundStyle(Color.readingAccent)
                                 .frame(width: 26)
                             Text(hint.text)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundStyle(Color.readingForeground)
                         }
                     }
@@ -1135,7 +1135,7 @@ private struct NewTextChip: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color.readingAccent)
                     Text("New text — read it?")
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.readingForeground)
                 }
                 .contentShape(Rectangle())
@@ -1190,7 +1190,7 @@ private struct ContextStrip: View {
             + phrase(w.current, Color.readingForeground).bold()
             + phrase(w.after.isEmpty ? "" : " " + w.after, Color.readingMuted.opacity(0.82))
         )
-        .font(.system(size: 18, weight: .regular, design: .rounded))
+        .font(.system(size: 18, weight: .regular))
         .lineSpacing(6)
         .multilineTextAlignment(.center)
         .lineLimit(5)
@@ -1286,7 +1286,7 @@ private struct PivotWord: View {
                 .alignmentGuide(.pivotCenter) { $0[HorizontalAlignment.center] }
             Text(parts.after).foregroundStyle(Color.readingForeground)
         }
-        .font(.system(size: size, weight: .semibold, design: .rounded))
+        .font(.system(size: size, weight: .semibold))
         .tracking(tracking)
         .lineLimit(1)
         // Measured, not wrapped: the fit already guarantees it stays in bounds.
@@ -1541,14 +1541,14 @@ private struct SpeedDial: View {
     private func labelledReadout(top: String) -> some View {
         VStack(spacing: 0) {
             Text(top)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
             Text("\(wpm)")
-                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .font(.system(size: 17, weight: .bold))
                 .monospacedDigit()
                 .foregroundStyle(accent)
             Text("wpm")
-                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .font(.system(size: 8, weight: .medium))
                 .foregroundStyle(Color.readingMuted)
         }
         .transition(.opacity)
@@ -1652,7 +1652,7 @@ private struct NavFlashLabel: View {
             Text(countText)
             if !isBack { chevron }
         }
-        .font(.system(size: 17, weight: .semibold, design: .rounded))
+        .font(.system(size: 17, weight: .semibold))
         .foregroundStyle(Color.readingMuted)
         .padding(.horizontal, 18)
         .padding(.vertical, 11)
@@ -1757,7 +1757,7 @@ private struct ScrubReadout: View {
 
     var body: some View {
         Text("\(index + 1) / \(total.formatted())  ·  \(Int((progress * 100).rounded()))%")
-            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(Color.readingForeground)
             .monospacedDigit()
             .padding(.horizontal, 14)

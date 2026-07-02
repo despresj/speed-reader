@@ -66,11 +66,11 @@ struct SettingsView: View {
     private var header: some View {
         HStack {
             Text("Settings")
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
             Spacer()
             Button("Done") { dismiss() }
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.readingAccent)
         }
         .padding(.horizontal, 22)
@@ -99,7 +99,7 @@ struct SettingsView: View {
             viewModel.isLeftHanded = isLeft
         } label: {
             Text(title)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(selected ? Color.readingOnAccent : Color.readingMuted)
                 .padding(.vertical, 6)
                 .padding(.horizontal, 16)
@@ -121,10 +121,10 @@ struct SettingsView: View {
 
                 VStack(spacing: 1) {
                     Text(band.label)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.readingForeground)
                     Text("\(band.wpm) wpm")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .medium))
                         .monospacedDigit()
                         .foregroundStyle(Color.readingMuted)
                 }
@@ -193,10 +193,10 @@ private struct SettingRow<Control: View>: View {
         HStack(alignment: .center, spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color.readingForeground)
                 Text(subtitle)
-                    .font(.system(size: 12, design: .rounded))
+                    .font(.system(size: 12))
                     .foregroundStyle(Color.readingMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }

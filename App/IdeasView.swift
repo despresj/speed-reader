@@ -55,11 +55,11 @@ struct IdeasView: View {
     private var header: some View {
         HStack {
             Text("Ideas")
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
             Spacer()
             Button("Done") { dismiss() }
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.readingAccent)
         }
         .padding(.horizontal, 22)
@@ -72,7 +72,7 @@ struct IdeasView: View {
     private var inputRow: some View {
         HStack(spacing: 10) {
             TextField("Add idea…", text: $draft, axis: .vertical)
-                .font(.system(size: 17, design: .rounded))
+                .font(.system(size: 17))
                 .foregroundStyle(Color.readingForeground)
                 .lineLimit(1...4)
                 .focused($inputFocused)
@@ -150,10 +150,10 @@ struct IdeasView: View {
                 .font(.system(size: 30, weight: .light))
                 .foregroundStyle(Color.readingMuted)
             Text("No ideas yet")
-                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .font(.system(size: 17, weight: .medium))
                 .foregroundStyle(Color.readingForeground)
             Text("Jot a friction point or improvement\nas you notice it.")
-                .font(.system(size: 14, design: .rounded))
+                .font(.system(size: 14))
                 .foregroundStyle(Color.readingMuted)
                 .multilineTextAlignment(.center)
             Spacer()
@@ -181,10 +181,10 @@ private struct IdeaRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(idea.text)
-                    .font(.system(size: 16, design: .rounded))
+                    .font(.system(size: 16))
                     .foregroundStyle(Color.readingForeground)
                 Text(idea.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(.system(size: 12, design: .rounded))
+                    .font(.system(size: 12))
                     .foregroundStyle(Color.readingMuted)
             }
             Spacer(minLength: 0)

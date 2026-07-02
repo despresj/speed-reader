@@ -34,10 +34,10 @@ struct ComprehensionCheckView: View {
         VStack(spacing: 14) {
             ProgressView().tint(Color.readingAccent)
             Text("Building your check…")
-                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .font(.system(size: 17, weight: .medium))
                 .foregroundStyle(Color.readingForeground)
             Text("Looking for the main thread, not trivia.")
-                .font(.system(size: 13, design: .rounded)).foregroundStyle(Color.readingMuted)
+                .font(.system(size: 13)).foregroundStyle(Color.readingMuted)
             Button("Cancel") { dismiss() }.buttonStyle(SecondaryPillStyle()).padding(.top, 8)
         }
     }
@@ -46,10 +46,10 @@ struct ComprehensionCheckView: View {
         if let q = model.currentQuestion, let check = model.check {
             VStack(alignment: .leading, spacing: 18) {
                 Text("\(model.currentIndex + 1) of \(check.questions.count)")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.readingMuted)
                 Text(q.question)
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(Color.readingForeground)
                 ForEach(ChoiceKey.allCases, id: \.self) { key in
                     choiceButton(key, q: q)
@@ -74,7 +74,7 @@ struct ComprehensionCheckView: View {
         return Button { model.select(key) } label: {
             HStack {
                 Text(q.choices.text(for: key))
-                    .font(.system(size: 15, design: .rounded))
+                    .font(.system(size: 15))
                     .foregroundStyle(Color.readingForeground)
                     .multilineTextAlignment(.leading)
                 Spacer()
@@ -90,15 +90,15 @@ struct ComprehensionCheckView: View {
     private func feedback(_ q: ComprehensionQuestion) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(model.selected[q.id] == q.correctChoice ? "Correct." : "Not quite.")
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
-            Text(q.explanation).font(.system(size: 14, design: .rounded))
+            Text(q.explanation).font(.system(size: 14))
                 .foregroundStyle(Color.readingMuted)
             Text("From the passage: \u{201C}\(q.supportingQuote)\u{201D}")
-                .font(.system(size: 13, design: .rounded)).italic()
+                .font(.system(size: 13)).italic()
                 .foregroundStyle(Color.readingMuted)
             Button("This seems off") { model.flagCurrentDisputed() }
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color.readingAccent)
                 .disabled(q.disputed)
         }
@@ -109,11 +109,11 @@ struct ComprehensionCheckView: View {
         if let r = model.result {
             VStack(spacing: 16) {
                 Text("\(r.correct) / \(r.scored)")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(Color.readingForeground).monospacedDigit()
-                Text(r.headline).font(.system(size: 18, weight: .semibold, design: .rounded))
+                Text(r.headline).font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.readingForeground)
-                Text(r.guidance).font(.system(size: 14, design: .rounded))
+                Text(r.guidance).font(.system(size: 14))
                     .foregroundStyle(Color.readingMuted).multilineTextAlignment(.center)
                 VStack(spacing: 12) {
                     if model.canGenerateMore {
@@ -129,7 +129,7 @@ struct ComprehensionCheckView: View {
 
     private func message(_ text: String, primary: String) -> some View {
         VStack(spacing: 16) {
-            Text(text).font(.system(size: 15, design: .rounded))
+            Text(text).font(.system(size: 15))
                 .foregroundStyle(Color.readingForeground).multilineTextAlignment(.center)
             Button(primary) {
                 if case .failed = model.phase { Task { await model.retry() } } else { dismiss() }

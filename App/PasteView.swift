@@ -109,7 +109,7 @@ struct PasteView: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .semibold))
                 Text("Reads")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
             }
             .foregroundStyle(Color.readingMuted)
             .padding(.leading, 11)
@@ -132,7 +132,7 @@ struct PasteView: View {
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.system(size: 14, weight: .semibold))
                 Text("Recents")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
             }
             .foregroundStyle(Color.readingMuted)
             .padding(.leading, 13)
@@ -150,18 +150,18 @@ struct PasteView: View {
     private var header: some View {
         VStack(spacing: 14) {
             Text("Skim")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold))
                 .tracking(4)
                 .foregroundStyle(Color.readingMuted)
 
             Text("Read faster without losing the thread.")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .font(.system(size: 30, weight: .bold))
                 .foregroundStyle(Color.readingForeground)
                 .multilineTextAlignment(.center)
                 .lineSpacing(2)
 
             Text("Paste text or copy something before opening Skim. We’ll take it from there.")
-                .font(.system(size: 16, weight: .regular, design: .rounded))
+                .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(Color.readingMuted)
                 .multilineTextAlignment(.center)
                 .lineSpacing(2)
@@ -176,7 +176,7 @@ struct PasteView: View {
     private var inputField: some View {
         TextEditor(text: $draft)
             .focused($fieldFocused)
-            .font(.system(size: 18, weight: .regular, design: .rounded))
+            .font(.system(size: 18, weight: .regular))
             .foregroundStyle(Color.readingForeground)
             .tint(Color.readingAccent)
             .scrollContentBackground(.hidden)
@@ -196,7 +196,7 @@ struct PasteView: View {
                 // text actually begins (outer padding + the editor's own inset).
                 if draft.isEmpty {
                     Text("Paste anything here…")
-                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundStyle(Color.readingMuted)
                         .padding(.leading, 21)
                         .padding(.top, 24)
@@ -212,7 +212,7 @@ struct PasteView: View {
         Button("Use clipboard") {
             viewModel.pasteFromClipboard()
         }
-        .font(.system(size: 14, weight: .medium, design: .rounded))
+        .font(.system(size: 14, weight: .medium))
         .foregroundStyle(Color.readingMuted)
         .buttonStyle(.plain)
     }
@@ -236,7 +236,7 @@ struct PasteView: View {
                     Text("Estimated read  ·  ").foregroundColor(Color.readingMuted)
                     + Text(estimate).foregroundColor(Color.readingAccent)
                 )
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: 14, weight: .semibold))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 9)

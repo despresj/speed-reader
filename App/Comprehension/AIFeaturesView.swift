@@ -18,7 +18,7 @@ struct AIFeaturesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     Text("AI Comprehension Checks")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .font(.system(size: 22, weight: .semibold))
                         .foregroundStyle(Color.readingForeground)
 
                     Text("Use your own OpenAI API key to generate optional comprehension "
@@ -26,7 +26,7 @@ struct AIFeaturesView: View {
                         + "Skim does not provide API credits. When AI comprehension checks are "
                         + "enabled, eligible pasted/imported reads may be sent to OpenAI in the "
                         + "background so questions are ready when you finish.")
-                        .font(.system(size: 13, design: .rounded))
+                        .font(.system(size: 13))
                         .foregroundStyle(Color.readingMuted)
 
                     Toggle("Enable comprehension checks", isOn: Binding(
@@ -43,7 +43,7 @@ struct AIFeaturesView: View {
                             }
                         }))
                         .tint(Color.readingAccent)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.readingForeground)
                         .sheet(isPresented: $showingConsent) {
                             ComprehensionConsentView(
@@ -80,7 +80,7 @@ struct AIFeaturesView: View {
                         }
                     }
 
-                    if let status { Text(status).font(.system(size: 13, design: .rounded))
+                    if let status { Text(status).font(.system(size: 13))
                         .foregroundStyle(Color.readingMuted) }
                     Spacer(minLength: 0)
                 }

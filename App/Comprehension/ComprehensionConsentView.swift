@@ -11,14 +11,14 @@ struct ComprehensionConsentView: View {
             ReadingCanvas()
             VStack(alignment: .leading, spacing: 18) {
                 Text("Comprehension checks")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(Color.readingForeground)
                 Text("Comprehension checks send this read's text to OpenAI using your API key. "
                     + "Because pre-generation runs when you load text, the text may be sent as "
                     + "soon as you paste or import it — not only when you open a check. Your key "
                     + "is stored locally in iOS Keychain. Skim does not provide API credits. You "
                     + "can delete your key anytime in Settings.")
-                    .font(.system(size: 14, design: .rounded))
+                    .font(.system(size: 14))
                     .foregroundStyle(Color.readingMuted)
                 VStack(spacing: 12) {
                     Button("Continue") { onContinue() }.buttonStyle(PrimaryPillStyle())

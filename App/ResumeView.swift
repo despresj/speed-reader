@@ -99,11 +99,11 @@ struct ResumeView: View {
     private var header: some View {
         VStack(spacing: 6) {
             Text("WELCOME BACK")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 12, weight: .semibold))
                 .tracking(3)
                 .foregroundStyle(Color.readingMuted)
             Text("Pick up where you left off")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(Color.readingForeground)
                 .multilineTextAlignment(.center)
         }
@@ -116,7 +116,7 @@ struct ResumeView: View {
         Button { viewModel.resume(candidate) } label: {
             VStack(alignment: .leading, spacing: 14) {
                 Text(candidate.title ?? "Untitled")
-                    .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(Color.readingForeground)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -127,10 +127,10 @@ struct ResumeView: View {
 
                 HStack(spacing: 6) {
                     resumeMetadata(candidate)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .font(.system(size: 13, weight: .medium))
                     Spacer()
                     Label("Resume", systemImage: "play.fill")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.readingAccent)
                 }
             }
@@ -154,7 +154,7 @@ struct ResumeView: View {
     private var recentsHeader: some View {
         HStack {
             Text("Recent")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color.readingMuted)
             Spacer()
         }
@@ -210,11 +210,11 @@ private struct RecentRow: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title ?? "Untitled")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color.readingForeground)
                     .lineLimit(1)
                 Text(ReadProgress.subtitle(item, estimate: estimate))
-                    .font(.system(size: 12, design: .rounded))
+                    .font(.system(size: 12))
                     .foregroundStyle(Color.readingMuted)
             }
             Spacer(minLength: 8)

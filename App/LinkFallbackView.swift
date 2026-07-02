@@ -17,11 +17,11 @@ struct LinkFallbackView: View {
 
                 VStack(spacing: 14) {
                     Text("Link received")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundStyle(Color.readingForeground)
 
                     Text(viewModel.pendingLink ?? "")
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundStyle(Color.readingMuted)
                         .lineLimit(1)
                         .truncationMode(.middle)
@@ -36,7 +36,7 @@ struct LinkFallbackView: View {
                         )
 
                     Text("Article extraction coming soon.")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(Color.readingMuted)
                 }
 
@@ -70,7 +70,7 @@ struct LinkFallbackView: View {
             Button("Not now") {
                 viewModel.dismissLink()
             }
-            .font(.system(size: 14, weight: .medium, design: .rounded))
+            .font(.system(size: 14, weight: .medium))
             .foregroundStyle(Color.readingMuted)
             .buttonStyle(.plain)
             .padding(.top, 2)

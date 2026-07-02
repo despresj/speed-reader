@@ -69,15 +69,15 @@ struct ExportView: View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Make reading video")
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .font(.system(size: 19, weight: .bold))
                     .foregroundStyle(Color.readingForeground)
                 Text("Turn this read into a vertical MP4.")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(Color.readingMuted)
             }
             Spacer()
             Button("Cancel") { dismiss() }
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.readingMuted)
         }
         .padding(.horizontal, 22)
@@ -111,14 +111,14 @@ struct ExportView: View {
             }
             HStack(spacing: 6) {
                 Text("Estimated \(settings.format == .gif ? "GIF" : "video"): \(viewModel.estimateLabel)")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.readingMuted)
                     .monospacedDigit()
                 Spacer()
             }
             if let warning = viewModel.warning {
                 Text(warning)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Color.readingAccent)
             }
         }
@@ -178,7 +178,7 @@ struct ExportView: View {
         VStack(spacing: 8) {
             if case let .failed(message) = viewModel.phase {
                 Text(message)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.readingAccent)
                     .multilineTextAlignment(.center)
             }
@@ -202,10 +202,10 @@ struct ExportView: View {
         VStack(spacing: 18) {
             Spacer()
             Text("Rendering video")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
             Text("\(Int(progress * 100))%")
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(size: 44, weight: .bold))
                 .foregroundStyle(Color.readingAccent)
                 .monospacedDigit()
             ProgressView(value: progress)
@@ -217,7 +217,7 @@ struct ExportView: View {
                     viewModel.cancelExport()
                     dismiss()
                 }
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Color.readingMuted)
                 .padding(.bottom, 28)
             }

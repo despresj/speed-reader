@@ -34,10 +34,10 @@ struct ReviewView: View {
     private var header: some View {
         VStack(spacing: 8) {
             Text("Done")
-                .font(.system(size: 30, weight: .semibold, design: .rounded))
+                .font(.system(size: 30, weight: .semibold))
                 .foregroundStyle(Color.readingForeground)
             Text(metaLine)
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.readingMuted)
                 .monospacedDigit()
         }
@@ -57,7 +57,7 @@ struct ReviewView: View {
     private var fullText: some View {
         ScrollView {
             Text(viewModel.reviewText)
-                .font(.system(size: 19, weight: .regular, design: .rounded))
+                .font(.system(size: 19, weight: .regular))
                 .foregroundStyle(Color.readingForeground.opacity(0.92))
                 .lineSpacing(8)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -97,12 +97,12 @@ struct ReviewView: View {
                         .foregroundStyle(Color.readingAccent)
                     VStack(alignment: .leading, spacing: 1) {
                         Text("Check understanding")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color.readingForeground)
                         if let subtitle = checkSubtitle(for: info.status, readId: info.readId,
                                                         service: info.service) {
                             Text(subtitle)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Color.readingMuted)
                         }
                     }
