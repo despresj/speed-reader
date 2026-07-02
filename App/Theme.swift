@@ -1,22 +1,22 @@
 import SwiftUI
 import UIKit
 
-/// Calm, system-aware palette. Warm paper in light mode; a warm near-black lit
-/// by a luminous gold accent in dark — "reading by lamplight." Neutrals sit on
-/// a consistent warm ramp so the darks glow rather than glare; the light bronze
-/// accent is deepened to meet WCAG AA with white text on the accent fill.
+/// Crisp, system-aware palette. Cool paper and true ink in light mode; ink-at-night
+/// blue-charcoal in dark — with one vivid vermillion "thread" reserved for your
+/// place in the text (pivot letter, progress thread, active-word highlight). The
+/// light-mode vermillion is deepened so white text on the accent fill meets AA.
 extension Color {
     /// Base canvas. A `readingCanvas` gradient is layered on top for depth.
-    /// Dark is a *warm* near-black (#11100D), not a dead neutral, so shadows
-    /// read as lamplight; light is warm paper (#FBF7F0), free of the green cast.
+    /// Dark is a *cool* blue-charcoal near-black (#0D0E11); light is crisp cool
+    /// paper (#FAFAF8). No warm cast anywhere.
     static let readingBackground = dynamic(
-        dark:  UIColor(red: 0.067, green: 0.063, blue: 0.051, alpha: 1),
-        light: UIColor(red: 0.984, green: 0.969, blue: 0.941, alpha: 1)
+        dark:  UIColor(red: 0.051, green: 0.055, blue: 0.067, alpha: 1),
+        light: UIColor(red: 0.980, green: 0.980, blue: 0.973, alpha: 1)
     )
 
     /// Slightly lifted surface for cards and inputs.
     static let readingSurface = dynamic(
-        dark:  UIColor(red: 0.129, green: 0.122, blue: 0.106, alpha: 1),
+        dark:  UIColor(red: 0.090, green: 0.094, blue: 0.114, alpha: 1),
         light: UIColor(white: 1.0, alpha: 1)
     )
 
@@ -26,53 +26,51 @@ extension Color {
         light: UIColor(white: 0.0, alpha: 0.08)
     )
 
-    /// Primary text. Warm off-white (#F5F2ED) in dark to cut glare; warm ink
-    /// (#211C17), not pure black, in light.
+    /// Primary text. Cool off-white (#F2F2F4) in dark to cut glare; true ink
+    /// (#16161A), not pure black, in light.
     static let readingForeground = dynamic(
-        dark:  UIColor(red: 0.961, green: 0.949, blue: 0.929, alpha: 1),
-        light: UIColor(red: 0.129, green: 0.110, blue: 0.090, alpha: 1)
+        dark:  UIColor(red: 0.949, green: 0.949, blue: 0.957, alpha: 1),
+        light: UIColor(red: 0.086, green: 0.086, blue: 0.102, alpha: 1)
     )
 
-    /// De-emphasized text — hints, placeholders, secondary labels. Warm gray.
+    /// De-emphasized text — hints, placeholders, secondary labels. Cool gray.
     static let readingMuted = dynamic(
-        dark:  UIColor(red: 0.604, green: 0.584, blue: 0.549, alpha: 1),
-        light: UIColor(red: 0.420, green: 0.400, blue: 0.369, alpha: 1)
+        dark:  UIColor(red: 0.557, green: 0.561, blue: 0.596, alpha: 1),
+        light: UIColor(red: 0.431, green: 0.431, blue: 0.463, alpha: 1)
     )
 
-    /// Warm accent: luminous gold (#FAC26B) in dark, deep bronze (#A86B14) in
-    /// light — the latter deepened so white-on-accent meets AA.
+    /// The thread: vermillion. Glowing coral-vermillion (#FF6B4A) in dark; deep
+    /// vermillion (#C43C24) in light so white-on-accent meets AA.
     static let readingAccent = dynamic(
-        dark:  UIColor(red: 0.980, green: 0.761, blue: 0.420, alpha: 1),
-        light: UIColor(red: 0.659, green: 0.420, blue: 0.078, alpha: 1)
+        dark:  UIColor(red: 1.000, green: 0.420, blue: 0.290, alpha: 1),
+        light: UIColor(red: 0.769, green: 0.235, blue: 0.141, alpha: 1)
     )
 
     /// Color for text/icons sitting on top of the accent fill.
     static let readingOnAccent = dynamic(
-        dark:  UIColor(red: 0.102, green: 0.086, blue: 0.063, alpha: 1),
+        dark:  UIColor(red: 0.051, green: 0.055, blue: 0.067, alpha: 1),
         light: UIColor(white: 1.0, alpha: 1)
     )
 
     /// The pivot ("optimal recognition point") letter that holds your eye on a
-    /// fixed spot as words flash past. Tinted with the app's amber accent so the
-    /// reading surface speaks one color language — gold (#FAC26B) in dark, bronze
-    /// (#A86B14) in light, matching `readingAccent`.
+    /// fixed spot as words flash past — the thread stitched through the word.
+    /// Same vermillion as `readingAccent` so the reading surface speaks one
+    /// color language.
     static let readingPivot = dynamic(
-        dark:  UIColor(red: 0.980, green: 0.761, blue: 0.420, alpha: 1),
-        light: UIColor(red: 0.659, green: 0.420, blue: 0.078, alpha: 1)
+        dark:  UIColor(red: 1.000, green: 0.420, blue: 0.290, alpha: 1),
+        light: UIColor(red: 0.769, green: 0.235, blue: 0.141, alpha: 1)
     )
 
-    /// The hot end of the speed-warmth ramp: a brighter, more saturated amber the
-    /// accents lean toward at full speed. Stays in the same gold family as
-    /// `readingAccent` so the surface keeps one color language — just more
-    /// energized. Dark leans luminous; light deepens toward burnt amber so the
-    /// warmth still reads against paper. Never red — this is energy, not alarm.
+    /// The hot end of the speed ramp: the thread heats from vermillion toward
+    /// orange at full speed. Stays in the same family as `readingAccent` so the
+    /// surface keeps one color language — just more energized. Energy, not alarm.
     static let readingAccentHot = dynamic(
-        dark:  UIColor(red: 1.000, green: 0.702, blue: 0.282, alpha: 1),
-        light: UIColor(red: 0.745, green: 0.404, blue: 0.039, alpha: 1)
+        dark:  UIColor(red: 1.000, green: 0.541, blue: 0.239, alpha: 1),
+        light: UIColor(red: 0.820, green: 0.290, blue: 0.070, alpha: 1)
     )
 
     /// The accent warmed toward `readingAccentHot` by `warmth` (0…1). At rest it's
-    /// the calm gold; at a blast it's the hotter amber.
+    /// the calm vermillion; at a blast it's the hotter orange.
     static func readingAccent(warmth: Double) -> Color {
         lerp(.readingAccent, .readingAccentHot, warmth)
     }
@@ -108,15 +106,15 @@ extension Color {
     }
 }
 
-/// Speed-responsive warmth: a tight amber *instrument aura* that gently lights the
-/// speed gauge in the reading-hand corner and fades fast into the dark canvas — a
+/// Speed-responsive warmth: a tight vermillion *instrument aura* that gently lights
+/// the speed gauge in the reading-hand corner and fades fast into the dark canvas — a
 /// localized glow that belongs to the gauge, not a side panel or an edge wash. Its
-/// hue rides the speed (muted amber cruising → richer orange-gold at a blast) and it
+/// hue rides the speed (muted vermillion cruising → hotter orange at a blast) and it
 /// swells a little as the band climbs; it stays subtle while actively reading and a
 /// touch more present when paused or while the dial is being turned.
 ///
 /// Two layers, back to front, so the warmth frames the word instead of competing:
-///   1. A subtle vignette that lets the edges settle into warm black, deepening the
+///   1. A subtle vignette that lets the edges settle into ink, deepening the
 ///      middle and keeping the focal word in a clean, dark pocket.
 ///   2. A tight aura centered on the gauge — radius only modestly past the
 ///      instrument, opacity front-loaded so it's nearly gone before the center word.
@@ -133,9 +131,8 @@ struct ReadingWarmth: View {
     var intensity: Double = 0.4
 
     var body: some View {
-        // Hue rides the speed, in the same amber family as the gauge: a muted
-        // amber while cruising, warming toward a richer orange-gold at a blast —
-        // never red, never an alarm.
+        // Hue rides the speed, in the same vermillion family as the gauge: muted
+        // while cruising, heating toward orange at a blast — energy, not alarm.
         let hue = Color.readingAccent(warmth: warmth)
 
         // The gauge sits at mid-height hugging the reading-hand edge. The halo is
@@ -148,18 +145,18 @@ struct ReadingWarmth: View {
         // speed. Brightness only — the radius below is fixed.
         let auraPeak = (0.045 + warmth * 0.05) * intensity
 
-        // Vignette ink — warm near-black in dark; a faint, low-alpha warm gray in
+        // Vignette ink — cool near-black in dark; a faint, low-alpha cool gray in
         // light so the frame stays a whisper against paper, never a smudge.
         let shade = Color(uiColor: UIColor { trait in
             trait.userInterfaceStyle == .dark
-                ? UIColor(red: 0.016, green: 0.014, blue: 0.010, alpha: 1.0)
-                : UIColor(red: 0.38, green: 0.34, blue: 0.28, alpha: 0.12)
+                ? UIColor(red: 0.008, green: 0.010, blue: 0.016, alpha: 1.0)
+                : UIColor(red: 0.30, green: 0.30, blue: 0.34, alpha: 0.12)
         })
 
         return ZStack {
-            // 1 · Vignette, beneath the warmth so the amber still reads warm at the
+            // 1 · Vignette, beneath the aura so the vermillion still reads at the
             //     lower edge instead of being muted by the frame. Clear through the
-            //     center (the word's pocket), falling to warm black at the edges.
+            //     center (the word's pocket), falling to ink at the edges.
             RadialGradient(
                 gradient: Gradient(stops: [
                     .init(color: .clear, location: 0.0),
@@ -196,14 +193,14 @@ struct ReadingWarmth: View {
     }
 }
 
-/// Full-bleed background: a faint warm glow at the top settling into the deep
+/// Full-bleed background: a faint cool lift at the top settling into the deep
 /// base. Sits behind every screen for a sense of depth.
 struct ReadingCanvas: View {
     var body: some View {
         let top = Color(uiColor: UIColor { trait in
             trait.userInterfaceStyle == .dark
-                ? UIColor(red: 0.125, green: 0.108, blue: 0.082, alpha: 1)
-                : UIColor(red: 1.0, green: 0.980, blue: 0.949, alpha: 1)
+                ? UIColor(red: 0.078, green: 0.084, blue: 0.104, alpha: 1)
+                : UIColor(red: 1.0, green: 1.0, blue: 0.996, alpha: 1)
         })
         LinearGradient(
             colors: [top, .readingBackground, .readingBackground],
