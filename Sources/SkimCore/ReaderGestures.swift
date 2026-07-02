@@ -12,10 +12,12 @@ import Foundation
 ///   • Tap anywhere — a single tap brakes *only while cruising* (else no-op); a
 ///     double tap toggles Cruise on/off. Also global, no carve-out by side.
 ///   • Steer on the rail — a vertical slide changes speed, a horizontal flick
-///     jumps ±12 words. These are the *only* rail-scoped gestures: they fire
-///     just for a touch that began in the thumb rail, so the basic "make words
-///     move" actions never depend on finding the rail, but the easy-to-trigger
-///     speed/skip steering stays off the bare canvas.
+///     moves by *sentences*: back replays the sentence you're in (the spec's
+///     primary recovery action), forward skips to the next one. These are the
+///     *only* rail-scoped gestures: they fire just for a touch that began in
+///     the thumb rail, so the basic "make words move" actions never depend on
+///     finding the rail, but the easy-to-trigger speed/skip steering stays off
+///     the bare canvas.
 ///
 /// Explicit controls (settings/export/ideas, back chevron, scrubber, new-text
 /// chip) sit *above* this surface layer and consume their own taps, so they
@@ -48,8 +50,8 @@ public enum ReaderIntent: Equatable, Sendable {
     case pauseCruise         // ReaderViewModel.pauseCruise()
     case beginPrecisionRead  // ReaderViewModel.startHolding()
     case changeSpeed         // ReaderViewModel.setBandIndex(_:)
-    case rewind              // ReaderViewModel.rewind12Words()
-    case forward             // ReaderViewModel.forward12Words()
+    case replaySentence      // ReaderViewModel.replaySentence()
+    case skipSentence        // ReaderViewModel.skipSentence()
 }
 
 public enum ReaderGestures {
@@ -100,7 +102,8 @@ public enum ReaderGestures {
 
     /// What a rail steer means. Steering is the rail's exclusive job: it fires only
     /// for a gesture that *began* in the rail zone (`startZone == .rail`) and only in
-    /// a live session — a slide changes speed, a flick jumps ±12 words. A canvas-
+    /// a live session — a slide changes speed, a back flick replays the current
+    /// sentence, a forward flick skips to the next sentence. A canvas-
     /// started gesture never steers, so a hold-to-read out on the bare surface can't
     /// drift the speed or fire a skip, and the idle/completed surfaces are inert.
     public static func steerIntent(_ steer: RailSteer,
@@ -111,8 +114,8 @@ public enum ReaderGestures {
         }
         switch steer {
         case .slide:         return .changeSpeed
-        case .flickBack:     return .rewind
-        case .flickForward:  return .forward
+        case .flickBack:     return .replaySentence
+        case .flickForward:  return .skipSentence
         }
     }
 }

@@ -8,9 +8,11 @@ final class Haptics {
         case pause       // released / paused
         case bandChange  // speed band changed
         case cruiseOn    // entered hands-free cruise
-        case rewind      // flicked left — jumped back 12 words
-        case forward     // flicked right — jumped ahead 12 words
+        case replaySentence          // flicked left — replaying the current sentence
+        case replayPreviousSentence  // flicked left in the grace window — reached the sentence before
+        case skipSentence            // flicked right — skipped to the next sentence
         case finish      // reached the end
+        case finishEcho  // the completion thread finished drawing — the finish's soft echo
         case newText     // loaded freshly copied text via the "new text" chip
         case copy        // copied the full read text to the clipboard
         case recenter    // tapped "Current word" to recenter the paused context
@@ -51,9 +53,18 @@ final class Haptics {
                 try? await Task.sleep(for: .milliseconds(90))
                 self?.light.impactOccurred(intensity: 0.6)
             }
-        case .rewind:     medium.impactOccurred(intensity: 0.7)
-        case .forward:    medium.impactOccurred(intensity: 0.5)
+        case .replaySentence: medium.impactOccurred(intensity: 0.7)
+        case .replayPreviousSentence:
+            // Two medium bumps — reaching a sentence further back *feels* further
+            // back than the single bump of replaying the one you're in.
+            medium.impactOccurred(intensity: 0.7)
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(90))
+                self?.medium.impactOccurred(intensity: 0.7)
+            }
+        case .skipSentence: medium.impactOccurred(intensity: 0.5)
         case .finish:     heavy.impactOccurred()
+        case .finishEcho: soft.impactOccurred(intensity: 0.6)
         case .newText:    soft.impactOccurred(intensity: 0.6)
         case .copy:       soft.impactOccurred(intensity: 0.5)
         case .recenter:   soft.impactOccurred(intensity: 0.5)

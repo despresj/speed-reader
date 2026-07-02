@@ -693,6 +693,63 @@ do {
     expectEqual(ReadingNavigation.jumpTarget(from: 0, by: -12, count: 0), 0, "empty read stays at 0")
 }
 
+print("SentenceNavigation — semantic flick targets")
+do {
+    // Three sentences of known shape. Sentence 0 = tokens 0-3, sentence 1 =
+    // tokens 4-8, sentence 2 = tokens 9-11.
+    let t = Tokenizer.tokenize("Alpha bravo charlie delta. Echo foxtrot golf hotel india. Juliet kilo lima.")
+    expectEqual(t.count, 12, "fixture tokenizes to 12 words")
+    expectEqual(t[4].sentenceIndex, 1, "fixture sentence boundary where expected")
+
+    // Mid-sentence replay lands on that sentence's first token.
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 6), 4, "mid-sentence replay -> sentence start")
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 8), 4, "sentence-end replay -> sentence start")
+    // Inside the grace window (first 2 tokens of a sentence) replay reaches the
+    // PREVIOUS sentence — right after a replay, "what did that say?" means the
+    // one before, not the two words just shown.
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 4), 0, "grace window at token 0 of a sentence -> previous sentence")
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 5), 0, "grace window at token 1 of a sentence -> previous sentence")
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 9), 4, "grace window in last sentence -> middle sentence start")
+    // The first sentence has nothing before it: the grace window clamps to 0.
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 1), 0, "grace window in first sentence clamps to 0")
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 3), 0, "mid-first-sentence replay -> 0")
+
+    // Skip lands on the next sentence's first token; in the last sentence it
+    // lands on the final token so playback runs out and completes naturally.
+    expectEqual(SentenceNavigation.skipTarget(tokens: t, from: 1), 4, "skip from first sentence -> second sentence start")
+    expectEqual(SentenceNavigation.skipTarget(tokens: t, from: 6), 9, "skip from middle sentence -> last sentence start")
+    expectEqual(SentenceNavigation.skipTarget(tokens: t, from: 10), 11, "skip in last sentence -> final token")
+    expectEqual(SentenceNavigation.skipTarget(tokens: t, from: 11), 11, "skip on final token stays put")
+
+    // Out-of-range and empty inputs are safe no-ops, never a crash or a bad index.
+    expectEqual(SentenceNavigation.replayTarget(tokens: t, from: 500), 9, "overshot index clamps to last token's sentence")
+    expectEqual(SentenceNavigation.replayTarget(tokens: [], from: 3), 0, "empty read replays to 0")
+    expectEqual(SentenceNavigation.skipTarget(tokens: [], from: 3), 0, "empty read skips to 0")
+}
+
+print("ResumeGlide — re-entry ease")
+do {
+    // A quick brake resumes instantly; a real pause earns the glide.
+    expect(ResumeGlide.plan(pauseDuration: 0.5) == nil, "sub-threshold pause -> no glide")
+    expect(ResumeGlide.plan(pauseDuration: 1.99) == nil, "just under threshold -> no glide")
+    let glide = ResumeGlide.plan(pauseDuration: 2.0)
+    expect(glide != nil, "threshold pause -> glide")
+    expectEqual(glide?.backStep, ResumeGlide.backStepWords, "resume glide steps back 3 words")
+    expectEqual(glide?.span, ResumeGlide.easeSpan, "resume glide eases over 8 tokens")
+
+    // The curve: peak on the first token, monotonically settling to exactly 1.
+    let g = ResumeGlide.landing()
+    expectEqual(g.backStep, 0, "landing ease has no back-step — the flick chose the spot")
+    expectClose(g.multiplier(atToken: 0), ResumeGlide.peakMultiplier, "token 0 runs at the 1.6x peak")
+    for k in 1..<g.span {
+        expect(g.multiplier(atToken: k) <= g.multiplier(atToken: k - 1) + 1e-12,
+               "glide multiplier never increases (token \(k))")
+        expect(g.multiplier(atToken: k) > 1.0, "glide is still easing inside the span (token \(k))")
+    }
+    expectEqual(g.multiplier(atToken: g.span), 1.0, "at the span boundary pacing is exactly normal")
+    expectEqual(g.multiplier(atToken: g.span + 50), 1.0, "well past the span stays exactly normal")
+}
+
 print("ReaderGestures — zone resolution (both reading hands)")
 do {  // plain scope — these checks don't throw
     // A 390pt screen with the production 0.42 rail fraction: rail spans 163.8pt on
@@ -762,8 +819,8 @@ do {  // plain scope — these checks don't throw
     // speed or fire a skip.
     expectEqual(ReaderGestures.steerIntent(.slide, startZone: .rail, startState: .cruisePlaying), .changeSpeed, "rail slide mid-cruise -> speed change")
     expectEqual(ReaderGestures.steerIntent(.slide, startZone: .rail, startState: .ready), .changeSpeed, "rail slide at rest -> speed change")
-    expectEqual(ReaderGestures.steerIntent(.flickBack, startZone: .rail, startState: .cruisePlaying), .rewind, "rail flick ← mid-cruise -> rewind 12")
-    expectEqual(ReaderGestures.steerIntent(.flickForward, startZone: .rail, startState: .precisionHeld), .forward, "rail flick → while held -> forward 12")
+    expectEqual(ReaderGestures.steerIntent(.flickBack, startZone: .rail, startState: .cruisePlaying), .replaySentence, "rail flick ← mid-cruise -> replay sentence")
+    expectEqual(ReaderGestures.steerIntent(.flickForward, startZone: .rail, startState: .precisionHeld), .skipSentence, "rail flick → while held -> skip sentence")
     // Canvas-started steering is always inert — the bare surface never steers.
     for steer in [RailSteer.slide, .flickBack, .flickForward] {
         for state in [ReaderState.ready, .paused, .cruisePlaying, .precisionHeld] {

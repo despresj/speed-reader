@@ -55,6 +55,10 @@ struct ReviewView: View {
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.15)) {
                 threadDrawn = true
+            } completion: {
+                // The soft second half of the finish haptic, landing exactly as
+                // the thread settles.
+                viewModel.completionThreadLanded()
             }
         }
     }

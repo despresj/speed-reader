@@ -96,6 +96,30 @@ final class ReaderViewModel {
 
     private var playbackTask: Task<Void, Never>?
 
+    /// When the reader last settled into `.paused` — the clock the resume glide
+    /// reads. Set on every pause path, consumed (nilled) by `planResumeGlide`.
+    private var pausedAt: Date?
+
+    /// Whether the user moved the cursor while paused (flick or scrub). A chosen
+    /// spot is respected: the next resume skips the glide's back-step and keeps
+    /// only the pacing ease.
+    private var pausedRepositioned = false
+
+    /// The re-entry ease in flight, if any: the next `glideTokenCount`-th token
+    /// runs at `activeGlide.multiplier(atToken:)` times its normal delay. Felt,
+    /// not shown — the band and gauge never move. Cleared when the ease settles
+    /// or the engine stops.
+    private var activeGlide: ResumeGlide?
+    private var glideTokenCount = 0
+
+    /// True for the brief beat between paragraphs while playing: the word canvas
+    /// clears, the thread stays, and the new paragraph opens on a fresh breath.
+    /// Visual only — no haptic — and only ever true mid-playback.
+    private(set) var paragraphBreath = false
+
+    /// How long the between-paragraphs beat holds the canvas clear.
+    private static let paragraphBreathSeconds = 0.2
+
     /// A running auto-start speed ramp (gentle acceleration up to cruising speed).
     /// Lives independently of the playback loop, which simply reads the live `band`
     /// each word — so the ramp just nudges `band` along its curve and the pacing,
@@ -597,59 +621,66 @@ final class ReaderViewModel {
     // MARK: Navigation (rail flicks)
 
     /// How far a horizontal rail flick jumps. A fixed, predictable step — no
-    /// WPM-scaled or sentence-relative math, so "back a bit" / "ahead a bit"
-    /// always means the same distance.
-    let navigationJumpWords = 12
-
-    /// A transient confirmation of the last flick jump, for the view to flash and
-    /// fade. `seq` bumps on every jump so two identical flicks in a row still
+    /// A transient confirmation of the last flick, for the view to flash and
+    /// fade. `seq` bumps on every flick so two identical flicks in a row still
     /// re-trigger the animation; the view keys its fade off it.
     struct NavFlash: Equatable {
-        enum Direction { case back, forward }
-        let direction: Direction
-        /// Words actually moved (≥ 1) — honest at the edges, where a flick near
-        /// the start/end travels fewer than `navigationJumpWords`.
-        let words: Int
+        enum Kind { case replaySentence, replayPreviousSentence, skipSentence }
+        let kind: Kind
         let seq: Int
     }
 
-    /// The most recent flick jump. `nil` until the first jump of a session.
+    /// The most recent flick. `nil` until the first flick of a session.
     private(set) var navFlash: NavFlash?
     private var navFlashSeq = 0
 
-    /// Flick left: jump back a fixed step. Clamped at the start. Never changes
-    /// the reader's state, so a flick while paused stays paused, while reading
-    /// keeps reading, and while cruising keeps cruising.
-    func rewind12Words() {
+    /// Flick left: replay the sentence you're in from its start — or, inside the
+    /// grace window right after a sentence opens, the previous one ("wait, what
+    /// did that say?" means the one before, not the two words just shown). Never
+    /// changes the reader's state, so a flick while paused stays paused, while
+    /// reading keeps reading, and while cruising keeps cruising. Mid-play the
+    /// landing gets the soft re-entry ease; the flick chose the spot, so no
+    /// back-step.
+    func replaySentence() {
         guard !tokens.isEmpty else { return }
-        let from = currentIndex
-        currentIndex = ReadingNavigation.jumpTarget(
-            from: currentIndex, by: -navigationJumpWords, count: tokens.count)
-        emitNavFlash(.back, moved: from - currentIndex)
-        haptics.tick(.rewind)
-        restartPlaybackIfPlaying()
-        if state == .paused { bumpRecenter() }
+        let from = min(max(0, currentIndex), tokens.count - 1)
+        let target = SentenceNavigation.replayTarget(tokens: tokens, from: from)
+        let reachedPrevious = tokens[target].sentenceIndex != tokens[from].sentenceIndex
+        let moved = from != target
+        currentIndex = target
+        if moved { emitNavFlash(reachedPrevious ? .replayPreviousSentence : .replaySentence) }
+        haptics.tick(reachedPrevious ? .replayPreviousSentence : .replaySentence)
+        if state == .precisionHeld || state == .cruisePlaying {
+            beginGlide(ResumeGlide.landing())
+            startPlayback()
+        } else if state == .paused {
+            pausedRepositioned = true
+            bumpRecenter()
+        }
     }
 
-    /// Flick right: jump ahead a fixed step. Clamped at the last word.
-    func forward12Words() {
+    /// Flick right: skip to the start of the next sentence. In the last sentence
+    /// it lands on the final word so playback runs out and completes naturally.
+    /// Forward motion is deliberate, so no landing ease.
+    func skipSentence() {
         guard !tokens.isEmpty else { return }
-        let from = currentIndex
-        currentIndex = ReadingNavigation.jumpTarget(
-            from: currentIndex, by: navigationJumpWords, count: tokens.count)
-        emitNavFlash(.forward, moved: currentIndex - from)
-        haptics.tick(.forward)
+        let from = min(max(0, currentIndex), tokens.count - 1)
+        currentIndex = SentenceNavigation.skipTarget(tokens: tokens, from: from)
+        if currentIndex != from { emitNavFlash(.skipSentence) }
+        haptics.tick(.skipSentence)
         restartPlaybackIfPlaying()
-        if state == .paused { bumpRecenter() }
+        if state == .paused {
+            pausedRepositioned = true
+            bumpRecenter()
+        }
     }
 
-    /// Publish a flick confirmation. A jump that moved nothing (already pinned at
+    /// Publish a flick confirmation. A flick that moved nothing (already pinned at
     /// an edge) shows no label — the edge haptic alone marks the boundary, and a
-    /// "0 words" flash would only clutter the sacred surface.
-    private func emitNavFlash(_ direction: NavFlash.Direction, moved: Int) {
-        guard moved > 0 else { return }
+    /// no-move flash would only clutter the sacred surface.
+    private func emitNavFlash(_ kind: NavFlash.Kind) {
         navFlashSeq += 1
-        navFlash = NavFlash(direction: direction, words: moved, seq: navFlashSeq)
+        navFlash = NavFlash(kind: kind, seq: navFlashSeq)
     }
 
     /// After a jump, if the engine is running, restart the pacing loop so the
@@ -674,6 +705,7 @@ final class ReaderViewModel {
         cancelPlayback()
         isScrubbing = true
         state = .paused
+        notePaused()
         scrubQuarter = Int(progress * 4)
         bumpRecenter()
         haptics.prepare()
@@ -697,6 +729,7 @@ final class ReaderViewModel {
 
         guard target != currentIndex else { return }
         currentIndex = target
+        pausedRepositioned = true
         bumpRecenter()
     }
 
@@ -714,6 +747,9 @@ final class ReaderViewModel {
         if currentIndex >= tokens.count - 1 {
             finish()
         } else {
+            // A scrub is a reposition, so this keeps only the pacing ease (and
+            // only if the whole time paused crossed the glide threshold).
+            planResumeGlide(resumingFromPause: true)
             mode = .cruise
             state = .cruisePlaying
             startPlayback()
@@ -732,6 +768,7 @@ final class ReaderViewModel {
             cancelPlayback()
             mode = .precisionHeld
             state = .paused
+            notePaused()
             saveProgress()
         }
     }
@@ -832,6 +869,7 @@ final class ReaderViewModel {
     func enterCruise() {
         guard state == .paused || state == .ready else { return }
         reactivateIfCompleted()
+        planResumeGlide(resumingFromPause: state == .paused)
         mode = .cruise
         state = .cruisePlaying
         haptics.tick(.cruiseOn)
@@ -845,6 +883,7 @@ final class ReaderViewModel {
         cancelPlayback()
         mode = .precisionHeld
         state = .paused
+        notePaused()
         bumpRecenter()
         saveProgress()
         haptics.tick(.pause)
@@ -870,6 +909,7 @@ final class ReaderViewModel {
     func startHolding() {
         guard state == .ready || state == .paused else { return }
         reactivateIfCompleted()
+        planResumeGlide(resumingFromPause: state == .paused)
         mode = .precisionHeld
         state = .precisionHeld
         haptics.prepare()
@@ -881,6 +921,7 @@ final class ReaderViewModel {
         guard state == .precisionHeld else { return }
         cancelPlayback()
         state = .paused
+        notePaused()
         bumpRecenter()
         saveProgress()
         haptics.tick(.pause)
@@ -894,6 +935,7 @@ final class ReaderViewModel {
         cancelPlayback()
         mode = .precisionHeld
         state = .paused
+        notePaused()
         // Leaving the foreground is a natural save point — bank the position now.
         saveProgress()
     }
@@ -1030,6 +1072,54 @@ final class ReaderViewModel {
         if pendingResume?.id == item.id { offerResumeOrIdle() }
     }
 
+    // MARK: Resume glide (soft re-entry after a pause)
+
+    /// Mark the moment the reader settles into `.paused`, for the resume glide's
+    /// clock. Idempotent while paused: a scrub that begins on an already-paused
+    /// read keeps the original pause time (and any reposition), so the glide
+    /// measures the whole time away, not the last touch.
+    private func notePaused() {
+        guard pausedAt == nil else { return }
+        pausedAt = Date()
+        pausedRepositioned = false
+    }
+
+    /// Consume the pause clock at every playback (re)start. Resuming from a real
+    /// pause (≥ the core threshold) earns the glide: step back a few words onto
+    /// prose already read — unless the user repositioned while paused, in which
+    /// case their chosen spot stands — and ease the first tokens back to pace.
+    /// A quick brake, or a fresh start from `.ready`, resumes instantly.
+    private func planResumeGlide(resumingFromPause: Bool) {
+        let since = pausedAt
+        let repositioned = pausedRepositioned
+        pausedAt = nil
+        pausedRepositioned = false
+        guard resumingFromPause, let since,
+              let glide = ResumeGlide.plan(pauseDuration: Date().timeIntervalSince(since))
+        else { return }
+        if !repositioned, !tokens.isEmpty {
+            currentIndex = ReadingNavigation.jumpTarget(
+                from: currentIndex, by: -glide.backStep, count: tokens.count)
+        }
+        beginGlide(glide)
+    }
+
+    private func beginGlide(_ glide: ResumeGlide) {
+        activeGlide = glide
+        glideTokenCount = 0
+    }
+
+    /// The glide's extra delay factor for the token about to be shown — 1.0 when
+    /// no ease is in flight. Each call consumes one step; the glide retires
+    /// itself the moment its span is spent.
+    private func nextGlideMultiplier() -> Double {
+        guard let glide = activeGlide else { return 1 }
+        let m = glide.multiplier(atToken: glideTokenCount)
+        glideTokenCount += 1
+        if glideTokenCount >= glide.span { activeGlide = nil }
+        return m
+    }
+
     // MARK: Playback loop
 
     private func startPlayback() {
@@ -1038,8 +1128,20 @@ final class ReaderViewModel {
             while let self, !Task.isCancelled {
                 guard let token = self.currentToken else { self.finish(); return }
                 let seconds = Pacing.secondsPerToken(band: self.band, multiplier: token.delayMultiplier)
+                    * self.nextGlideMultiplier()
                 try? await Task.sleep(for: .seconds(seconds))
                 if Task.isCancelled { return }
+                // The breath: when the next word opens a new paragraph, hold the
+                // canvas clear for a beat so the break is felt, not just timed
+                // (the paragraph delay multiplier alone reads as a long word).
+                let nextIndex = self.currentIndex + 1
+                if self.tokens.indices.contains(nextIndex),
+                   self.tokens[nextIndex].paragraphIndex != token.paragraphIndex {
+                    self.paragraphBreath = true
+                    try? await Task.sleep(for: .seconds(Self.paragraphBreathSeconds))
+                    self.paragraphBreath = false
+                    if Task.isCancelled { return }
+                }
                 self.advance()
             }
         }
@@ -1065,6 +1167,13 @@ final class ReaderViewModel {
         }
     }
 
+    /// The review screen's completion thread finished drawing. The finish moment
+    /// is two-stage: the heavy tick fires on arrival (`finish()`), and this soft
+    /// echo lands with the thread — the haptic and the visual close together.
+    func completionThreadLanded() {
+        haptics.tick(.finishEcho)
+    }
+
     private func cancelPlayback() {
         playbackTask?.cancel()
         playbackTask = nil
@@ -1073,5 +1182,11 @@ final class ReaderViewModel {
         // Restart-in-place after a flick uses `startPlayback` directly, not this, so
         // a flick leaves the ramp climbing.
         cancelRamp()
+        // Same for a re-entry ease: it belongs to the run it started in. The next
+        // resume plans its own.
+        activeGlide = nil
+        glideTokenCount = 0
+        // Never leave the canvas stuck mid-breath if the engine stops during one.
+        paragraphBreath = false
     }
 }

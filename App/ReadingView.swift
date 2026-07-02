@@ -182,7 +182,7 @@ struct ReadingView: View {
     //      strip all behave the same.
     //   2. Gauge Control Zone — the reading-hand `gaugeZoneWidth` strip (drawn by
     //      `controlZone`, but non-interactive). It owns the gauge + halo and is the
-    //      steering lane: a gesture that *begins* here can slide→speed or flick→±12,
+    //      steering lane: a gesture that *begins* here can slide→speed or flick→sentence,
     //      and threadline scrolling never starts here. The text column ends where
     //      this strip begins, so the two never compete. Hold/tap stay global
     //      (read/cruise from anywhere); a Text-Zone gesture never steers, and a
@@ -409,6 +409,10 @@ struct ReadingView: View {
                       warmth: viewModel.speedWarmth)
                 // Hold the baseline steady; no per-word animation/jitter.
                 .animation(nil, value: viewModel.currentIndex)
+                // The paragraph breath: the word clears for a beat at a paragraph
+                // break, so the new paragraph opens on a fresh inhale.
+                .opacity(viewModel.paragraphBreath ? 0 : 1)
+                .animation(.easeOut(duration: 0.12), value: viewModel.paragraphBreath)
                 // Drop into a deliberate upper focal zone — clearly off the
                 // status bar / Dynamic Island, so the hero word reads as placed,
                 // not stranded in the corner, and holds a repeatable spot.
@@ -693,19 +697,19 @@ struct ReadingView: View {
         case .toggleCruise:       viewModel.toggleCruise()
         case .pauseCruise:        viewModel.pauseCruise()
         case .beginPrecisionRead: viewModel.startHolding()
-        case .rewind:             viewModel.rewind12Words()
-        case .forward:            viewModel.forward12Words()
+        case .replaySentence:     viewModel.replaySentence()
+        case .skipSentence:       viewModel.skipSentence()
         case .changeSpeed:        break
         }
     }
 
-    // MARK: Flick navigation indicator (transient "jumped N words" flash)
+    // MARK: Flick navigation indicator (transient sentence-flick flash)
 
-    /// A soft, centered confirmation of the last rail flick — `‹ 12 words` back,
-    /// `12 words ›` ahead. It snaps in on each jump and dissolves over ~0.5s, so
-    /// you get a glance of how far you moved without a control settling on the
-    /// surface. Never hit-testable, and the count is the *actual* distance moved
-    /// (honest at the edges); a zero-move flick emits nothing, so it stays blank.
+    /// A soft, centered confirmation of the last rail flick — `‹ Replay sentence`
+    /// back (`‹ Previous sentence` from the grace window), `Skip sentence ›`
+    /// ahead. It snaps in on each flick and dissolves over ~0.5s, so you get a
+    /// glance of what happened without a control settling on the surface. Never
+    /// hit-testable; a flick already pinned at an edge emits nothing.
     @ViewBuilder
     private var navFlashLayer: some View {
         if let flash = viewModel.navFlash {
@@ -889,9 +893,10 @@ struct ReadingView: View {
                         if viewModel.bandIndex != before { dbg("rail speed → \(viewModel.wpm) wpm") }
                     }
                 case .horizontal:
-                    // Left = back 12 words, right = ahead 12 — a timeline
-                    // metaphor, identical for either hand and in any mode. One
-                    // jump per out-and-back; re-arms on return through the deadzone.
+                    // Left = replay the current sentence, right = skip to the
+                    // next — semantic recovery, identical for either hand and in
+                    // any mode. One flick per out-and-back; re-arms on return
+                    // through the deadzone.
                     if flickArmed, abs(dx) > flickThreshold {
                         let steer: RailSteer = dx < 0 ? .flickBack : .flickForward
                         let intent = ReaderGestures.steerIntent(steer, startZone: gestureStartZone,
@@ -985,7 +990,7 @@ struct ReadingView: View {
                         .overlay(Rectangle().strokeBorder(
                             Color.purple, style: StrokeStyle(lineWidth: 1.5, dash: [6])))
                         .overlay(alignment: .top) {
-                            Text("RAIL (steer only)\nslide→speed · flick→±12")
+                            Text("RAIL (steer only)\nslide→speed · flick→sentence")
                                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
                                 .foregroundStyle(.purple)
                                 .multilineTextAlignment(.center)
@@ -1643,13 +1648,19 @@ private struct GaugeArc: Shape {
 private struct NavFlashLabel: View {
     let flash: ReaderViewModel.NavFlash
 
-    private var isBack: Bool { flash.direction == .back }
-    private var countText: String { "\(flash.words) word\(flash.words == 1 ? "" : "s")" }
+    private var isBack: Bool { flash.kind != .skipSentence }
+    private var labelText: String {
+        switch flash.kind {
+        case .replaySentence:         "Replay sentence"
+        case .replayPreviousSentence: "Previous sentence"
+        case .skipSentence:           "Skip sentence"
+        }
+    }
 
     var body: some View {
         HStack(spacing: 7) {
             if isBack { chevron }
-            Text(countText)
+            Text(labelText)
             if !isBack { chevron }
         }
         .font(.system(size: 17, weight: .semibold))
