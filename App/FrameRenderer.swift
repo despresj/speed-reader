@@ -2,9 +2,9 @@ import CoreGraphics
 import UIKit
 
 /// Draws one export frame's contents in UIKit (top-left) coordinates. It owns the
-/// export's visual identity — the reader's fixed warm-dark palette, the gold ORP
-/// pivot, the title/end cards, the optional progress bar and "SKIM" watermark — but
-/// no timing: it's handed a resolved phase/word/progress and renders it.
+/// export's visual identity — the reader's fixed ink-dark palette, the vermillion
+/// ORP pivot, the title/end cards, the optional progress bar and "SKIM" watermark —
+/// but no timing: it's handed a resolved phase/word/progress and renders it.
 ///
 /// Layout is authored at the 1080-wide canvas and uniformly scaled by `scale`, so
 /// the same renderer serves 1080×1920 MP4, 720×1280 MP4/GIF, and 540×960 GIF
@@ -43,11 +43,11 @@ struct FrameRenderer {
     private var scale: CGFloat { width / 1080 }
 
     // The reader's dark palette, fixed for the export (the video isn't system-aware).
-    private let bg = UIColor(red: 0.067, green: 0.063, blue: 0.051, alpha: 1)
-    private let bgGlow = UIColor(red: 0.161, green: 0.141, blue: 0.110, alpha: 1)
-    private let fg = UIColor(red: 0.961, green: 0.949, blue: 0.929, alpha: 1)
-    private let muted = UIColor(red: 0.604, green: 0.584, blue: 0.549, alpha: 1)
-    private let accent = UIColor(red: 0.980, green: 0.761, blue: 0.420, alpha: 1)
+    private let bg = UIColor(red: 0.051, green: 0.055, blue: 0.067, alpha: 1)
+    private let bgGlow = UIColor(red: 0.078, green: 0.084, blue: 0.104, alpha: 1)
+    private let fg = UIColor(red: 0.949, green: 0.949, blue: 0.957, alpha: 1)
+    private let muted = UIColor(red: 0.557, green: 0.561, blue: 0.596, alpha: 1)
+    private let accent = UIColor(red: 1.000, green: 0.420, blue: 0.290, alpha: 1)
 
     // Word layout @1080, scaled up from the reader's 52/30pt @ ~390pt-wide screen.
     private var wordBaseSize: CGFloat { 150 * scale }
@@ -81,7 +81,7 @@ struct FrameRenderer {
         bg.setFill()
         UIRectFill(CGRect(x: 0, y: 0, width: width, height: height))
 
-        // A soft warm glow pooled at the top settling into the deep base — the
+        // A faint cool lift pooled at the top settling into the deep base — the
         // reader's `ReadingCanvas`, top-lit.
         let colors = [bgGlow.cgColor, bg.cgColor] as CFArray
         if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
@@ -115,7 +115,7 @@ struct FrameRenderer {
             baseFontSize: Double(wordBaseSize),
             minFontSize: Double(wordMinSize))
         let size = CGFloat(fit.fontSize)
-        let font = roundedFont(size, .semibold)
+        let font = wordFont(size, .semibold)
 
         // Re-measure at the resolved size so the pivot's center lands exactly on the
         // (possibly shifted) anchor.
@@ -158,10 +158,10 @@ struct FrameRenderer {
     private func drawTitleCard() {
         let hasCredit = !sourceCredit.isEmpty
         let titleCenterY = hasCredit ? height * 0.38 : height * 0.40
-        drawCentered(title, font: roundedFont(92 * scale, .bold), color: fg,
+        drawCentered(title, font: wordFont(92 * scale, .bold), color: fg,
                      centerY: titleCenterY, maxWidth: width - sideMargin * 2, lineSpacing: 8 * scale)
         if hasCredit {
-            drawCentered(sourceCredit, font: roundedFont(34 * scale, .medium), color: muted,
+            drawCentered(sourceCredit, font: wordFont(34 * scale, .medium), color: muted,
                          centerY: titleCenterY + 150 * scale, maxWidth: width - sideMargin * 2,
                          lineSpacing: 4 * scale)
         }
@@ -170,16 +170,16 @@ struct FrameRenderer {
 
     private func drawEndCard() {
         let text = endCardText.isEmpty ? "Read anything\nlike this with Skim" : endCardText
-        drawCentered(text, font: roundedFont(78 * scale, .bold), color: fg,
+        drawCentered(text, font: wordFont(78 * scale, .bold), color: fg,
                      centerY: height * 0.42, maxWidth: width - sideMargin * 2, lineSpacing: 12 * scale)
         if showWatermark { drawWatermark(alpha: 0.75, y: height * 0.42 + 210 * scale) }
     }
 
-    /// The "SKIM" wordmark — letter-spaced, in the warm accent — the subtle
+    /// The "SKIM" wordmark — letter-spaced, in the vermillion accent — the subtle
     /// branding/watermark across cards and (faintly) the reading frames.
     private func drawWatermark(alpha: CGFloat, y: CGFloat) {
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: roundedFont(34 * scale, .semibold),
+            .font: wordFont(34 * scale, .semibold),
             .foregroundColor: accent.withAlphaComponent(alpha),
             .kern: 10 * scale,
         ]
@@ -212,13 +212,11 @@ struct FrameRenderer {
     /// Width of a run in the active word's font (kern 0, matching how it's drawn).
     private func measure(_ s: String, _ size: CGFloat) -> CGFloat {
         guard !s.isEmpty else { return 0 }
-        return ceil((s as NSString).size(withAttributes: [.font: roundedFont(size, .semibold)]).width)
+        return ceil((s as NSString).size(withAttributes: [.font: wordFont(size, .semibold)]).width)
     }
 
-    /// The rounded system font matching the reader's `.rounded` design.
-    private func roundedFont(_ size: CGFloat, _ weight: UIFont.Weight) -> UIFont {
-        let base = UIFont.systemFont(ofSize: size, weight: weight)
-        guard let d = base.fontDescriptor.withDesign(.rounded) else { return base }
-        return UIFont(descriptor: d, size: size)
+    /// Plain SF Pro matching the app's UI type. The streaming word stays sans.
+    private func wordFont(_ size: CGFloat, _ weight: UIFont.Weight) -> UIFont {
+        UIFont.systemFont(ofSize: size, weight: weight)
     }
 }
