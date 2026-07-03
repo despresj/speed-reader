@@ -811,36 +811,31 @@ do {  // plain scope — these checks don't throw
     expectEqual(ReaderGestures.tapIntent(.single, state: .idle), .none, "single tap on the idle screen -> no-op")
 }
 
-print("ReaderGestures — rail-only steering (slide/flick, gated by start zone)")
+print("ReaderGestures — global steering (slide/flick anywhere in a live session)")
 do {  // plain scope — these checks don't throw
-    // Steering is the rail's exclusive job: a slide/flick fires only when the gesture
-    // BEGAN in the rail zone and a live session is in progress. A canvas-started
-    // gesture never steers, so a hold-to-read out on the bare surface can't drift the
-    // speed or fire a skip.
-    expectEqual(ReaderGestures.steerIntent(.slide, startZone: .rail, startState: .cruisePlaying), .changeSpeed, "rail slide mid-cruise -> speed change")
-    expectEqual(ReaderGestures.steerIntent(.slide, startZone: .rail, startState: .ready), .changeSpeed, "rail slide at rest -> speed change")
-    expectEqual(ReaderGestures.steerIntent(.flickBack, startZone: .rail, startState: .cruisePlaying), .replaySentence, "rail flick ← mid-cruise -> replay sentence")
-    expectEqual(ReaderGestures.steerIntent(.flickForward, startZone: .rail, startState: .precisionHeld), .skipSentence, "rail flick → while held -> skip sentence")
-    // Canvas-started steering is always inert — the bare surface never steers.
-    for steer in [RailSteer.slide, .flickBack, .flickForward] {
-        for state in [ReaderState.ready, .paused, .cruisePlaying, .precisionHeld] {
-            expectEqual(ReaderGestures.steerIntent(steer, startZone: .canvas, startState: state), .none,
-                        "canvas-started \(steer) in \(state) never steers")
-        }
-    }
+    // Steering is as global as hold/tap: a slide/flick fires from a press that began
+    // anywhere on the open surface, in any live session. The model takes no zone, so
+    // left/center/right/edge are structurally identical — the whole screen is the
+    // joystick.
+    expectEqual(ReaderGestures.steerIntent(.slide, startState: .cruisePlaying), .changeSpeed, "slide mid-cruise -> speed change")
+    expectEqual(ReaderGestures.steerIntent(.slide, startState: .ready), .changeSpeed, "slide at rest -> speed change")
+    expectEqual(ReaderGestures.steerIntent(.slide, startState: .paused), .changeSpeed, "slide while paused -> speed change")
+    expectEqual(ReaderGestures.steerIntent(.slide, startState: .precisionHeld), .changeSpeed, "slide mid-hold -> speed change")
+    expectEqual(ReaderGestures.steerIntent(.flickBack, startState: .cruisePlaying), .replaySentence, "flick ← mid-cruise -> replay sentence")
+    expectEqual(ReaderGestures.steerIntent(.flickBack, startState: .paused), .replaySentence, "flick ← while paused -> replay sentence")
+    expectEqual(ReaderGestures.steerIntent(.flickForward, startState: .precisionHeld), .skipSentence, "flick → while held -> skip sentence")
+    expectEqual(ReaderGestures.steerIntent(.flickForward, startState: .ready), .skipSentence, "flick → at rest -> skip sentence")
     // No steer ever brakes or toggles cruise — taps own those alone.
     for steer in [RailSteer.slide, .flickBack, .flickForward] {
-        for zone in [GestureZone.rail, .canvas] {
-            for state in [ReaderState.ready, .paused, .cruisePlaying, .precisionHeld] {
-                let intent = ReaderGestures.steerIntent(steer, startZone: zone, startState: state)
-                expect(intent != .toggleCruise && intent != .pauseCruise && intent != .beginPrecisionRead,
-                       "steer \(steer) (\(zone)) in \(state) never leaks a tap/hold action")
-            }
+        for state in [ReaderState.ready, .paused, .cruisePlaying, .precisionHeld] {
+            let intent = ReaderGestures.steerIntent(steer, startState: state)
+            expect(intent != .toggleCruise && intent != .pauseCruise && intent != .beginPrecisionRead,
+                   "steer \(steer) in \(state) never leaks a tap/hold action")
         }
     }
-    // No steering on the idle/completed surfaces, even from the rail.
-    expectEqual(ReaderGestures.steerIntent(.slide, startZone: .rail, startState: .idle), .none, "no steering on the idle surface")
-    expectEqual(ReaderGestures.steerIntent(.flickForward, startZone: .rail, startState: .completed), .none, "no steering on the review screen")
+    // No steering on the idle/completed surfaces.
+    expectEqual(ReaderGestures.steerIntent(.slide, startState: .idle), .none, "no steering on the idle surface")
+    expectEqual(ReaderGestures.steerIntent(.flickForward, startState: .completed), .none, "no steering on the review screen")
 }
 
 print("ReadTimeEstimate")

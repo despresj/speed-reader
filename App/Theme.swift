@@ -1,73 +1,59 @@
 import SwiftUI
 import UIKit
 
-/// Crisp, system-aware palette. Cool paper and true ink in light mode; ink-at-night
-/// blue-charcoal in dark — with one vivid vermillion "thread" reserved for your
-/// place in the text (pivot letter, progress thread, active-word highlight). The
-/// light-mode vermillion is deepened so white text on the accent fill meets AA.
+/// Crisp, system-aware palette resolved through the selected theme
+/// (`SkimTheme.current`, set in Settings). Every role keeps a light and a dark
+/// variant — the system appearance decides which renders — and every theme keeps
+/// the one accent "thread" reserved for your place in the text (pivot letter,
+/// progress thread, active-word highlight), with light-mode accents deep enough
+/// that white-on-accent meets AA. Computed (not stored) so a theme change takes
+/// effect on the next render — `ContentView` keys the surface on the theme to
+/// force that render.
 extension Color {
     /// Base canvas. A `readingCanvas` gradient is layered on top for depth.
-    /// Dark is a *cool* blue-charcoal near-black (#0D0E11); light is crisp cool
-    /// paper (#FAFAF8). No warm cast anywhere.
-    static let readingBackground = dynamic(
-        dark:  UIColor(red: 0.051, green: 0.055, blue: 0.067, alpha: 1),
-        light: UIColor(red: 0.980, green: 0.980, blue: 0.973, alpha: 1)
-    )
+    static var readingBackground: Color { themed(\.background) }
 
     /// Slightly lifted surface for cards and inputs.
-    static let readingSurface = dynamic(
-        dark:  UIColor(red: 0.090, green: 0.094, blue: 0.114, alpha: 1),
-        light: UIColor(white: 1.0, alpha: 1)
-    )
+    static var readingSurface: Color { themed(\.surface) }
 
-    /// Hairline separators / borders.
+    /// Hairline separators / borders — theme-neutral by design.
     static let readingBorder = dynamic(
         dark:  UIColor(white: 1.0, alpha: 0.10),
         light: UIColor(white: 0.0, alpha: 0.08)
     )
 
-    /// Primary text. Cool off-white (#F2F2F4) in dark to cut glare; true ink
-    /// (#16161A), not pure black, in light.
-    static let readingForeground = dynamic(
-        dark:  UIColor(red: 0.949, green: 0.949, blue: 0.957, alpha: 1),
-        light: UIColor(red: 0.086, green: 0.086, blue: 0.102, alpha: 1)
-    )
+    /// Primary text. Off-white in dark to cut glare; deep ink, never pure black,
+    /// in light.
+    static var readingForeground: Color { themed(\.foreground) }
 
-    /// De-emphasized text — hints, placeholders, secondary labels. Cool gray.
-    static let readingMuted = dynamic(
-        dark:  UIColor(red: 0.557, green: 0.561, blue: 0.596, alpha: 1),
-        light: UIColor(red: 0.431, green: 0.431, blue: 0.463, alpha: 1)
-    )
+    /// De-emphasized text — hints, placeholders, secondary labels.
+    static var readingMuted: Color { themed(\.muted) }
 
-    /// The thread: vermillion. Glowing coral-vermillion (#FF6B4A) in dark; deep
-    /// vermillion (#C43C24) in light so white-on-accent meets AA.
-    static let readingAccent = dynamic(
-        dark:  UIColor(red: 1.000, green: 0.420, blue: 0.290, alpha: 1),
-        light: UIColor(red: 0.769, green: 0.235, blue: 0.141, alpha: 1)
-    )
+    /// The thread: the theme's one vivid accent.
+    static var readingAccent: Color { themed(\.accent) }
 
     /// Color for text/icons sitting on top of the accent fill.
-    static let readingOnAccent = dynamic(
-        dark:  UIColor(red: 0.051, green: 0.055, blue: 0.067, alpha: 1),
-        light: UIColor(white: 1.0, alpha: 1)
-    )
+    static var readingOnAccent: Color { themed(\.onAccent) }
 
     /// The pivot ("optimal recognition point") letter that holds your eye on a
     /// fixed spot as words flash past — the thread stitched through the word.
-    /// Same vermillion as `readingAccent` so the reading surface speaks one
+    /// Same accent as `readingAccent` so the reading surface speaks one
     /// color language.
-    static let readingPivot = dynamic(
-        dark:  UIColor(red: 1.000, green: 0.420, blue: 0.290, alpha: 1),
-        light: UIColor(red: 0.769, green: 0.235, blue: 0.141, alpha: 1)
-    )
+    static var readingPivot: Color { themed(\.accent) }
 
-    /// The hot end of the speed ramp: the thread heats from vermillion toward
-    /// orange at full speed. Stays in the same family as `readingAccent` so the
-    /// surface keeps one color language — just more energized. Energy, not alarm.
-    static let readingAccentHot = dynamic(
-        dark:  UIColor(red: 1.000, green: 0.541, blue: 0.239, alpha: 1),
-        light: UIColor(red: 0.820, green: 0.290, blue: 0.070, alpha: 1)
-    )
+    /// The hot end of the speed ramp: the thread heats toward the theme's
+    /// energized endpoint at full speed. Same family as `readingAccent` so the
+    /// surface keeps one color language — energy, not alarm.
+    static var readingAccentHot: Color { themed(\.accentHot) }
+
+    /// The faint lift at the top of the full-bleed canvas gradient.
+    static var readingCanvasTop: Color { themed(\.canvasTop) }
+
+    /// Resolve one palette role of the *current* theme into a trait-dynamic Color.
+    private static func themed(_ role: KeyPath<ThemePalette, ThemePalette.Pair>) -> Color {
+        let pair = SkimTheme.current.palette[keyPath: role]
+        return dynamic(dark: pair.dark, light: pair.light)
+    }
 
     /// The accent warmed toward `readingAccentHot` by `warmth` (0…1). At rest it's
     /// the calm vermillion; at a blast it's the hotter orange.
@@ -197,13 +183,8 @@ struct ReadingWarmth: View {
 /// base. Sits behind every screen for a sense of depth.
 struct ReadingCanvas: View {
     var body: some View {
-        let top = Color(uiColor: UIColor { trait in
-            trait.userInterfaceStyle == .dark
-                ? UIColor(red: 0.078, green: 0.084, blue: 0.104, alpha: 1)
-                : UIColor(red: 1.0, green: 1.0, blue: 0.996, alpha: 1)
-        })
         LinearGradient(
-            colors: [top, .readingBackground, .readingBackground],
+            colors: [.readingCanvasTop, .readingBackground, .readingBackground],
             startPoint: .top,
             endPoint: .bottom
         )

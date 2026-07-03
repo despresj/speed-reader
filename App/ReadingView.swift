@@ -11,9 +11,6 @@ struct ReadingView: View {
     /// Whether the Ideas scratchpad sheet is up.
     @State private var showingIdeas = false
 
-    /// Whether the Settings sheet is up.
-    @State private var showingSettings = false
-
     /// Briefly true after a copy from the overflow menu — drives the "Copied" pill.
     @State private var showCopied = false
 
@@ -100,9 +97,9 @@ struct ReadingView: View {
     /// (grab the wheel and read).
     @State private var gestureStartState: ReaderState = .ready
 
-    /// Which zone the current surface gesture *started* in. Hold and tap are global,
-    /// but steering (slide/flick) only fires when the press began on the rail — so a
-    /// hold-to-read out on the bare canvas can't drift the speed or fire a skip.
+    /// Which zone the current surface gesture *started* in. Purely diagnostic now —
+    /// hold, tap, and steering are all global — kept so the SKIM_GESTURE_DEBUG log
+    /// still names where each press landed.
     @State private var gestureStartZone: GestureZone = .canvas
 
     // MARK: Paused-Threadline gesture arbitration (band owns its own touches)
@@ -181,12 +178,12 @@ struct ReadingView: View {
     //      side-independent — left, center, right, the active word, the context
     //      strip all behave the same.
     //   2. Gauge Control Zone — the reading-hand `gaugeZoneWidth` strip (drawn by
-    //      `controlZone`, but non-interactive). It owns the gauge + halo and is the
-    //      steering lane: a gesture that *begins* here can slide→speed or flick→sentence,
-    //      and threadline scrolling never starts here. The text column ends where
-    //      this strip begins, so the two never compete. Hold/tap stay global
-    //      (read/cruise from anywhere); a Text-Zone gesture never steers, and a
-    //      Gauge-Zone gesture never scrolls the context.
+    //      `controlZone`, but non-interactive). It owns the gauge + halo as a
+    //      *display*; steering is global now — slide→speed and flick→sentence fire
+    //      from a press anywhere on the surface, same as hold/tap. The text column
+    //      still ends where this strip begins so prose never runs under the dial,
+    //      and threadline scrolling still never starts here (the paused band owns
+    //      its own touches).
     //   3. Utility controls — settings/export/lightbulb, back chevron, scrubber,
     //      new-text chip. Each consumes only its own tap; none leak to the surface
     //      because each sits above the surface layer and intercepts first.
@@ -247,11 +244,8 @@ struct ReadingView: View {
             .sheet(isPresented: $showingIdeas, onDismiss: { viewModel.overlayDismissed() }) {
                 IdeasView(ideas: ideas, capture: { viewModel.ideaCapture })
             }
-            // Settings pauses cruise on open and resumes it on close if it was On,
-            // same as the Ideas panel — the reading position is never lost.
-            .sheet(isPresented: $showingSettings, onDismiss: { viewModel.overlayDismissed() }) {
-                SettingsView(viewModel: viewModel)
-            }
+            // Settings is presented at the app level (ContentView), outside the
+            // theme identity boundary — `openSettings()` just asks the view model.
             // Export is an action on the current read. Opening it already paused any
             // cruise; it stays paused on dismiss (no auto-resume), so there's no
             // overlay resume hook here.
@@ -389,8 +383,7 @@ struct ReadingView: View {
 
     private func openSettings() {
         dbg("control tap: settings")
-        viewModel.overlayPresented()
-        showingSettings = true
+        viewModel.presentSettings()
     }
 
     /// Bank the "seen" flag so the coaching never returns, and fade it out.
@@ -675,12 +668,10 @@ struct ReadingView: View {
     /// decision in `ReaderGestures.tapIntent` (not inline here) is what lets the core
     /// suite verify the semantics on both hand modes without a device.
     private func dispatchSurfaceTap(_ tap: SurfaceTap) {
-        // A tap that landed on the dial/rail is a fumbled speed-steer, not a brake:
-        // the rail's job is the slide/flick, so swallow its taps rather than let one
-        // pause cruise (or toggle it). `gestureStartZone` is set on touch-down by the
-        // simultaneous drag, so it's the *this-tap* zone by the time a tap resolves.
-        // Braking stays trivially reachable — the whole canvas outside the thin rail.
-        if gestureStartZone == .rail { return }
+        // Taps are global, gauge included: with steering now surface-wide there is
+        // no "rail whose taps are fumbled steers" carve-out anymore — a genuine
+        // slide commits an axis and never resolves as a tap, so the brake and the
+        // Cruise toggle are reachable from any patch of the screen.
         let intent = ReaderGestures.tapIntent(tap, state: viewModel.state)
         dbg(tap == .double ? "reading surface double tap → cruise (\(intent))"
                            : "reading surface single tap → brake (\(intent))")
@@ -788,19 +779,18 @@ struct ReadingView: View {
     }
 
     /// The whole-surface press gesture. Press-and-hold *anywhere* reads; release
-    /// pauses. If — and only if — the press *began* on the thumb rail, it also
-    /// steers like a joystick: up/down throttles speed, a sideways flick rewinds 12
-    /// words (←) or fast-forwards 12 (→). A press that begins on the bare canvas
-    /// never steers, so its movement is ignored and a hold there just keeps reading.
+    /// pauses. And *any* press steers like a joystick: up/down throttles speed, a
+    /// sideways flick replays (←) or skips (→) a sentence — the whole screen is the
+    /// instrument, no invisible rail to find.
     ///
     /// The read is *hold-gated*: a touch arms a timer (`minHoldToRead`) instead of
     /// reading on contact, so a quick tap or an accidental brush lifts before it
     /// fires and is a true no-op — no read blip, no haptic (the tap is then resolved
-    /// by `surfaceTapGesture`). A deliberate hold crosses the threshold and reads. On
-    /// the rail, steering (a slide/flick that commits an axis) cancels the pending
-    /// read, so leading with movement just sets speed or jumps without starting a
-    /// read. Mid-cruise a hold never grabs the wheel: words already stream, so it only
-    /// steers (on the rail) and otherwise does nothing — braking is a tap.
+    /// by `surfaceTapGesture`). A deliberate hold crosses the threshold and reads.
+    /// Steering (a slide/flick that commits an axis) cancels the pending read, so
+    /// leading with movement just sets speed or jumps without starting a read.
+    /// Mid-cruise a hold never grabs the wheel: words already stream, so it only
+    /// steers and otherwise does nothing — braking is a tap.
     private func surfaceDragGesture(size: CGSize) -> some Gesture {
         let width = size.width
         return DragGesture(minimumDistance: 0)
@@ -836,11 +826,9 @@ struct ReadingView: View {
                     return
                 }
 
-                // Steering is rail-only: a canvas-started press ignores movement
-                // entirely, so a hold-to-read out on the open surface can't drift the
-                // speed or fire a skip. Only a rail-started press runs the joystick.
-                guard gestureStartZone == .rail else { return }
-
+                // The whole surface is the joystick: any press can steer. The
+                // deadzone + axis-dominance commit below is what keeps a steady
+                // reading hold from drifting the speed or leaking a flick.
                 let dx = value.translation.width
                 let dy = value.translation.height
                 let magnitude = (dx * dx + dy * dy).squareRoot()
@@ -879,9 +867,9 @@ struct ReadingView: View {
                 case .vertical:
                     // Map the whole band range across `slideSpan`, so every speed
                     // is reachable in one stroke. Up (negative height) = faster.
-                    // The decision "a rail slide steers speed" is owned by the core
+                    // The decision "a slide steers speed" is owned by the core
                     // model; the index it lands on is computed here.
-                    if ReaderGestures.steerIntent(.slide, startZone: gestureStartZone,
+                    if ReaderGestures.steerIntent(.slide,
                                                   startState: gestureStartState) == .changeSpeed {
                         // Turning the dial: light its live readout for as long as the
                         // vertical steer is held, even mid-cruise.
@@ -890,7 +878,7 @@ struct ReadingView: View {
                         let steps = Int((-dy / perBand).rounded())
                         let before = viewModel.bandIndex
                         viewModel.setBandIndex(speedBaseline + steps)
-                        if viewModel.bandIndex != before { dbg("rail speed → \(viewModel.wpm) wpm") }
+                        if viewModel.bandIndex != before { dbg("surface slide → \(viewModel.wpm) wpm") }
                     }
                 case .horizontal:
                     // Left = replay the current sentence, right = skip to the
@@ -899,9 +887,9 @@ struct ReadingView: View {
                     // through the deadzone.
                     if flickArmed, abs(dx) > flickThreshold {
                         let steer: RailSteer = dx < 0 ? .flickBack : .flickForward
-                        let intent = ReaderGestures.steerIntent(steer, startZone: gestureStartZone,
+                        let intent = ReaderGestures.steerIntent(steer,
                                                                 startState: gestureStartState)
-                        dbg("rail flick \(dx < 0 ? "←" : "→") → \(intent)")
+                        dbg("surface flick \(dx < 0 ? "←" : "→") → \(intent)")
                         apply(intent)
                         flickArmed = false
                     }
@@ -975,14 +963,14 @@ struct ReadingView: View {
                     .overlay(Rectangle().strokeBorder(
                         Color.cyan, style: StrokeStyle(lineWidth: 1.5, dash: [4])))
                     .overlay(alignment: .center) {
-                        Text("READING SURFACE\nhold→read · release→pause\ntap=brake (cruising) · 2-tap=cruise")
+                        Text("READING SURFACE\nhold→read · release→pause · slide→speed\nflick→sentence · tap=brake (cruising) · 2-tap=cruise")
                             .font(.system(size: 10, weight: .semibold, design: .monospaced))
                             .foregroundStyle(.cyan)
                             .multilineTextAlignment(.center)
                     }
 
-                // 2. Rail steer strip, on the reading-hand edge — the ONLY zone where
-                //    a press additionally steers speed/skip.
+                // 2. Gauge strip, on the reading-hand edge — display only now
+                //    (steering is global); logged so touch-downs still name it.
                 HStack(spacing: 0) {
                     if !leftHanded { Spacer(minLength: 0) }
                     Rectangle()
@@ -990,7 +978,7 @@ struct ReadingView: View {
                         .overlay(Rectangle().strokeBorder(
                             Color.purple, style: StrokeStyle(lineWidth: 1.5, dash: [6])))
                         .overlay(alignment: .top) {
-                            Text("RAIL (steer only)\nslide→speed · flick→sentence")
+                            Text("GAUGE ZONE (display only)\nsteering works everywhere")
                                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
                                 .foregroundStyle(.purple)
                                 .multilineTextAlignment(.center)
@@ -1072,8 +1060,8 @@ private struct GestureHintsOverlay: View {
         ("hand.point.up.left.fill", "Hold anywhere to read"),
         ("infinity",                "Double-tap for Cruise"),
         ("pause.fill",              "Tap to pause Cruise"),
-        ("arrow.up.arrow.down",     "Slide the edge for speed"),
-        ("arrow.left.and.right",    "Flick the edge to jump"),
+        ("arrow.up.arrow.down",     "Slide up or down for speed"),
+        ("arrow.left.and.right",    "Flick sideways to jump"),
     ]
 
     var body: some View {

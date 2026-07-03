@@ -36,6 +36,18 @@ struct ContentView: View {
         .animation(.easeOut(duration: 0.25), value: route)
         // Keep the reading screen lit while engaged with the thumb.
         .persistentSystemOverlays(.hidden)
+        // The theme identity boundary: every `Color.reading*` accessor resolves
+        // the live theme at render time, so keying the whole surface on it turns
+        // a theme change into one instant, everywhere-at-once repaint.
+        .id(viewModel.theme)
+        // Settings is presented ONCE here, deliberately *outside* the theme
+        // boundary above, so flipping through themes never tears the sheet down —
+        // the surface behind repaints live while the picker stays in hand.
+        .sheet(isPresented: Binding(get: { viewModel.showingSettings },
+                                    set: { viewModel.showingSettings = $0 }),
+               onDismiss: { viewModel.overlayDismissed() }) {
+            SettingsView(viewModel: viewModel)
+        }
     }
 
     private var screenTransition: AnyTransition {

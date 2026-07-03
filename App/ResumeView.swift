@@ -13,7 +13,6 @@ struct ResumeView: View {
     /// The read currently being renamed (drives the rename alert), plus its working title.
     @State private var renaming: ReadItem?
     @State private var renameDraft = ""
-    @State private var showingSettings = false
 
     /// Recent reads other than the hero candidate (which already has its own card).
     private var others: [ReadItem] {
@@ -50,12 +49,11 @@ struct ResumeView: View {
         }
         .onAppear { viewModel.refreshRecents() }
         .overlay(alignment: .topLeading) {
-            SettingsGear { showingSettings = true }
+            // Settings is one app-level sheet (see ContentView) so it survives
+            // live theme swaps; the gear just asks the view model to present it.
+            SettingsGear { viewModel.presentSettings() }
                 .padding(.leading, 16)
                 .padding(.top, 8)
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(viewModel: viewModel)
         }
         .alert("Rename read", isPresented: Binding(
             get: { renaming != nil },

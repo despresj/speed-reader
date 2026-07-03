@@ -39,26 +39,33 @@ struct SettingsView: View {
                 header
                 Divider().overlay(Color.readingBorder)
 
-                VStack(spacing: 26) {
-                    handRow
-                    speedRow
-                    cruiseRow
-                    aiRow
+                ScrollView {
+                    VStack(spacing: 26) {
+                        handRow
+                        speedRow
+                        cruiseRow
+                        themeRow
+                        aiRow
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.top, 22)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 22)
+                .scrollBounceBehavior(.basedOnSize)
                 .sheet(isPresented: $showingAI) {
                     if let service = viewModel.comprehension {
                         AIFeaturesView(service: service, settings: service.settingsForUI)
                     }
                 }
-
-                Spacer(minLength: 0)
             }
         }
-        .presentationDetents([.medium])
+        // Keyed on the theme so the sheet's own canvas and rows repaint in the
+        // instant a swatch is tapped — the sheet itself lives outside ContentView's
+        // theme boundary precisely so it *stays up* through the swap.
+        .id(viewModel.theme)
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-        .presentationBackground { ReadingCanvas() }
+        .presentationBackground { ReadingCanvas().id(viewModel.theme) }
     }
 
     // MARK: Header
@@ -162,6 +169,59 @@ struct SettingsView: View {
             .labelsHidden()
             .tint(Color.readingAccent)
         }
+    }
+
+    // MARK: Theme
+
+    /// Five tappable swatches — each a disc of its theme's background with the
+    /// theme's accent "thread" at its center, the selected one ringed in its own
+    /// accent. Applying is instant and app-wide (the surface behind this sheet
+    /// repaints live), so there's no preview/confirm step to add weight.
+    private var themeRow: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Theme")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color.readingForeground)
+                Text("The surface's ink and thread — \(viewModel.theme.displayName).")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.readingMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 16) {
+                ForEach(SkimTheme.allCases) { theme in
+                    themeSwatch(theme)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func themeSwatch(_ theme: SkimTheme) -> some View {
+        let selected = viewModel.theme == theme
+        let palette = theme.palette
+        let disc = Color(uiColor: ThemePalette.uiColor(palette.background))
+        let thread = Color(uiColor: ThemePalette.uiColor(palette.accent))
+        return Button {
+            viewModel.theme = theme
+        } label: {
+            ZStack {
+                Circle().fill(disc)
+                Circle().fill(thread).frame(width: 13, height: 13)
+            }
+            .frame(width: 36, height: 36)
+            .overlay(
+                Circle().stroke(selected ? thread : Color.readingBorder,
+                                lineWidth: selected ? 2 : 1)
+            )
+            // A forgiving hit target around the small disc.
+            .frame(width: 44, height: 44)
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(theme.displayName) theme")
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
     }
 
     // MARK: AI features

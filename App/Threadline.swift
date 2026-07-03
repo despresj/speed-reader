@@ -96,10 +96,18 @@ private struct ThreadlineTextView: UIViewRepresentable {
     }
 
     // Three legibility tiers: surrounding text dim but readable, the current
-    // sentence full ink as the "you are here" line, the active word vermillion on top.
-    private static let surroundColor = UIColor(Color.readingForeground).withAlphaComponent(0.55)
-    private static let sentenceColor = UIColor(Color.readingForeground)
-    private static let activeColor = UIColor(Color.readingAccent)
+    // sentence full ink as the "you are here" line, the active word in the theme's
+    // accent on top. Computed so each mount picks up the live theme's palette
+    // (a theme change remounts the band via ContentView's identity swap).
+    private static var surroundColor: UIColor {
+        ThemePalette.uiColor(SkimTheme.current.palette.foreground, alpha: 0.55)
+    }
+    private static var sentenceColor: UIColor {
+        ThemePalette.uiColor(SkimTheme.current.palette.foreground)
+    }
+    private static var activeColor: UIColor {
+        ThemePalette.uiColor(SkimTheme.current.palette.accent)
+    }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -310,9 +318,15 @@ private struct ThreadlineTextView: UIViewRepresentable {
         // Re-center ONLY on a discrete recenter bump — never just because the active
         // index moved — so free manual scrolling is never yanked back.
         if keyChanged {
+            // The very first centering after a (re)mount or a text swap must be
+            // *instant*: the band arrives already in place under its opacity
+            // transition, instead of animating a fast scroll from the top of the
+            // prose — the "scroll rush" this kills.
+            let firstCenter = coord.lastRecenterKey == Int.min
             coord.lastRecenterKey = recenterKey
             DispatchQueue.main.async {
-                center(textView, on: active, bias: Self.recenterBias)
+                center(textView, on: active, bias: Self.recenterBias,
+                       instant: firstCenter)
                 coord.updateOffCenter()
             }
         }
@@ -349,7 +363,16 @@ private struct ThreadlineTextView: UIViewRepresentable {
     /// slightly above center), clamped to the scrollable bounds. The clamp alone
     /// handles begin (pins near top), end (pins at bottom), and text shorter than
     /// the viewport (nothing to scroll).
-    private func center(_ textView: UITextView, on range: NSRange, bias: CGFloat) {
+    ///
+    /// Motion policy — the band must never *race* through prose:
+    ///   • `instant` (the first centering after a mount/text swap) jumps with no
+    ///     animation at all; the band's own fade is the only motion.
+    ///   • A **near** target (≤ 1.5 viewport heights away) glides with the native
+    ///     animated scroll — a locator tap after a small drift stays smooth.
+    ///   • A **far** target jumps under a short cross-dissolve instead of a
+    ///     high-velocity scroll blur.
+    private func center(_ textView: UITextView, on range: NSRange, bias: CGFloat,
+                        instant: Bool = false) {
         guard textView.bounds.height > 0, range.location != NSNotFound else { return }
         let layout = textView.layoutManager
         layout.ensureLayout(for: textView.textContainer)
@@ -361,6 +384,19 @@ private struct ThreadlineTextView: UIViewRepresentable {
         let target = rect.midY - textView.bounds.height * bias
         let maxOffset = max(0, textView.contentSize.height - textView.bounds.height)
         let y = min(max(0, target), maxOffset)
-        textView.setContentOffset(CGPoint(x: 0, y: y), animated: true)
+
+        if instant {
+            textView.setContentOffset(CGPoint(x: 0, y: y), animated: false)
+            return
+        }
+        let distance = abs(y - textView.contentOffset.y)
+        if distance <= textView.bounds.height * 1.5 {
+            textView.setContentOffset(CGPoint(x: 0, y: y), animated: true)
+        } else {
+            UIView.transition(with: textView, duration: 0.18,
+                              options: [.transitionCrossDissolve, .allowUserInteraction]) {
+                textView.setContentOffset(CGPoint(x: 0, y: y), animated: false)
+            }
+        }
     }
 }

@@ -70,6 +70,31 @@ final class ReaderViewModel {
         didSet { UserDefaults.standard.set(startInCruise, forKey: "skim.startInCruise") }
     }
 
+    /// The selected color theme. Persisted, and mirrored into `SkimTheme.current`
+    /// (which every `Color.reading*` accessor resolves through); `ContentView`
+    /// keys the whole surface on this so a change swaps every screen at once.
+    var theme: SkimTheme = SkimTheme.current {
+        didSet {
+            guard theme != oldValue else { return }
+            SkimTheme.current = theme
+            UserDefaults.standard.set(theme.rawValue, forKey: SkimTheme.defaultsKey)
+            haptics.tick(.themeChange)
+        }
+    }
+
+    /// Whether the Settings sheet is up. Held here — not per-screen — because the
+    /// sheet is presented once at the app level in `ContentView`, *outside* the
+    /// theme identity boundary, so picking a theme never tears the sheet down.
+    var showingSettings = false
+
+    /// Open Settings from any screen. Pauses a running cruise first (same overlay
+    /// contract as Ideas); `ContentView`'s onDismiss calls `overlayDismissed()`,
+    /// which resumes only if cruise was On.
+    func presentSettings() {
+        overlayPresented()
+        showingSettings = true
+    }
+
     /// The configured default cruising speed resolved to a real, in-range detent —
     /// the single source of truth every auto-start ramp accelerates toward, and the
     /// band a fresh manual read opens at. Clamps a stored preference that's somehow

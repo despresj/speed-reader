@@ -17,6 +17,7 @@ final class Haptics {
         case copy        // copied the full read text to the clipboard
         case recenter    // tapped "Current word" to recenter the paused context
         case scrubTick   // crossed a quarter mark while dragging the progress bar
+        case themeChange // picked a color theme in Settings
     }
 
     private let light = UIImpactFeedbackGenerator(style: .light)
@@ -69,6 +70,7 @@ final class Haptics {
         case .copy:       soft.impactOccurred(intensity: 0.5)
         case .recenter:   soft.impactOccurred(intensity: 0.5)
         case .scrubTick:  light.impactOccurred(intensity: 0.4)
+        case .themeChange: selection.selectionChanged()
         }
     }
 }

@@ -18,7 +18,6 @@ struct PasteView: View {
     /// reader loads it automatically (see the debounce in `.task` below).
     @State private var draft = ""
     @FocusState private var fieldFocused: Bool
-    @State private var showingSettings = false
 
     /// Compact "time at default" estimate for the current draft, recomputed when the
     /// text settles. `nil` (pill hidden) until there's enough text to be meaningful.
@@ -73,12 +72,11 @@ struct PasteView: View {
             .padding(.top, 8)
         }
         .overlay(alignment: .topTrailing) {
-            SettingsGear { showingSettings = true }
+            // Settings is one app-level sheet (see ContentView) so it survives
+            // live theme swaps; the gear just asks the view model to present it.
+            SettingsGear { viewModel.presentSettings() }
                 .padding(.trailing, 16)
                 .padding(.top, 8)
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(viewModel: viewModel)
         }
         // Populate the library so the standalone `Recents` pill knows whether to
         // show even on a cold launch that lands straight here.

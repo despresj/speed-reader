@@ -11,13 +11,12 @@ import Foundation
 ///     center, the right, the active word, or the context strip.
 ///   • Tap anywhere — a single tap brakes *only while cruising* (else no-op); a
 ///     double tap toggles Cruise on/off. Also global, no carve-out by side.
-///   • Steer on the rail — a vertical slide changes speed, a horizontal flick
+///   • Steer anywhere — a vertical slide changes speed, a horizontal flick
 ///     moves by *sentences*: back replays the sentence you're in (the spec's
-///     primary recovery action), forward skips to the next one. These are the
-///     *only* rail-scoped gestures: they fire just for a touch that began in
-///     the thumb rail, so the basic "make words move" actions never depend on
-///     finding the rail, but the easy-to-trigger speed/skip steering stays off
-///     the bare canvas.
+///     primary recovery action), forward skips to the next one. Steering is as
+///     global as hold/tap: the whole surface is the joystick, so the thumb
+///     never has to find an invisible rail. The deadzone + axis-dominance
+///     rules in the view are what keep a steady hold from drifting speed.
 ///
 /// Explicit controls (settings/export/ideas, back chevron, scrubber, new-text
 /// chip) sit *above* this surface layer and consume their own taps, so they
@@ -35,7 +34,9 @@ public enum SurfaceTap: Equatable, Sendable {
     case double
 }
 
-/// The rail's steering gestures — the only gestures scoped to the thumb rail.
+/// The surface's steering gestures — global, like hold and tap. The name keeps
+/// the rail's heritage (the gauge still lives on the reading-hand edge) but a
+/// steer now fires from a press that began anywhere on the open surface.
 public enum RailSteer: Equatable, Sendable {
     case slide
     case flickBack
@@ -57,10 +58,10 @@ public enum ReaderIntent: Equatable, Sendable {
 public enum ReaderGestures {
 
     /// Which zone a touch at horizontal position `touchX` falls in, given the rail
-    /// occupies `controlFraction` of `width` on the reading-hand edge. The zone no
-    /// longer changes what a hold or tap *means* — those are global — it only gates
-    /// the rail-scoped steering (`steerIntent`): right-handers' rail hugs the
-    /// trailing edge, left-handers' the leading edge, mirror-symmetric.
+    /// occupies `controlFraction` of `width` on the reading-hand edge. The zone
+    /// changes nothing anymore — hold, tap, *and* steering are all global — it
+    /// survives purely for the gesture-debug overlay's logging: right-handers'
+    /// rail hugs the trailing edge, left-handers' the leading edge, mirror-symmetric.
     public static func zone(touchX: Double,
                             width: Double,
                             controlFraction: Double,
@@ -100,16 +101,15 @@ public enum ReaderGestures {
         }
     }
 
-    /// What a rail steer means. Steering is the rail's exclusive job: it fires only
-    /// for a gesture that *began* in the rail zone (`startZone == .rail`) and only in
-    /// a live session — a slide changes speed, a back flick replays the current
-    /// sentence, a forward flick skips to the next sentence. A canvas-
-    /// started gesture never steers, so a hold-to-read out on the bare surface can't
-    /// drift the speed or fire a skip, and the idle/completed surfaces are inert.
+    /// What a steer means. Global, like hold and tap: it fires for a gesture that
+    /// began *anywhere* on the open surface, in any live session — a slide changes
+    /// speed, a back flick replays the current sentence, a forward flick skips to
+    /// the next sentence. Only the idle/completed surfaces are inert. (The view's
+    /// deadzone and axis-dominance rules are what keep a resting hold from
+    /// drifting the speed; the paused Threadline band still owns its own touches.)
     public static func steerIntent(_ steer: RailSteer,
-                                   startZone: GestureZone,
                                    startState: ReaderState) -> ReaderIntent {
-        guard startZone == .rail, startState != .idle, startState != .completed else {
+        guard startState != .idle, startState != .completed else {
             return .none
         }
         switch steer {
