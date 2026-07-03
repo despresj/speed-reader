@@ -1251,6 +1251,52 @@ do {
     expectEqual(try! store.checks(forReadId: "read-1").first?.score, 1, "score persists on completion")
 }
 
+print("ScreenWake — the screen stays lit only while words advance")
+do {  // plain scope — these checks don't throw
+    // Both directions of the promise: a cruise (no touches) must hold the screen
+    // awake, and every parked state must hand the idle timer back. Exhaustive over
+    // all six states so a future case can't silently leak a wake lock.
+    expect(ScreenWake.shouldStayAwake(.precisionHeld), "a held read keeps the screen awake")
+    expect(ScreenWake.shouldStayAwake(.cruisePlaying), "cruise keeps the screen awake — it has no touches to do it")
+    expect(!ScreenWake.shouldStayAwake(.idle), "idle never holds the screen")
+    expect(!ScreenWake.shouldStayAwake(.ready), "ready (parked, pre-read) never holds the screen")
+    expect(!ScreenWake.shouldStayAwake(.paused), "paused restores the idle timer")
+    expect(!ScreenWake.shouldStayAwake(.completed), "the review screen restores the idle timer")
+}
+
+print("ReadTimeEstimate — remaining time (\"can I finish this?\")")
+do {  // plain scope — these checks don't throw
+    let tokens = Tokenizer.tokenize("One two three four five. Six seven eight nine ten.")
+    let wpm = 300
+    let total = ReadTimeEstimate.seconds(tokens: tokens, wpm: wpm)
+
+    expectClose(ReadTimeEstimate.remainingSeconds(tokens: tokens, from: 0, wpm: wpm), total,
+                "remaining from the start is the full estimate")
+    expectClose(ReadTimeEstimate.remainingSeconds(tokens: tokens, from: tokens.count, wpm: wpm), 0,
+                "remaining at the end is zero")
+    expectClose(ReadTimeEstimate.remainingSeconds(tokens: tokens, from: -3, wpm: wpm), total,
+                "an index before the start clamps to the full estimate")
+    expectClose(ReadTimeEstimate.remainingSeconds(tokens: tokens, from: tokens.count + 50, wpm: wpm), 0,
+                "an index past the end clamps to zero")
+    // Monotone: reading forward can only shrink what's left.
+    var previous = total
+    for i in 1...tokens.count {
+        let remaining = ReadTimeEstimate.remainingSeconds(tokens: tokens, from: i, wpm: wpm)
+        expect(remaining <= previous + 1e-9, "remaining never grows as the reader advances (index \(i))")
+        previous = remaining
+    }
+    // Multiplier-aware: a paragraph-broken tail outlasts a flat tail of the same
+    // token count, because the pause multipliers live in the remainder.
+    let flat = Tokenizer.tokenize("alpha beta gamma delta epsilon zeta")
+    let broken = Tokenizer.tokenize("alpha beta gamma.\n\ndelta epsilon zeta")
+    expect(ReadTimeEstimate.remainingSeconds(tokens: broken, from: 2, wpm: wpm) >
+           ReadTimeEstimate.remainingSeconds(tokens: flat, from: 2, wpm: wpm),
+           "a pause-heavy tail estimates a longer remainder than a flat one")
+    // Empty stream: nothing to read, nothing left.
+    expectClose(ReadTimeEstimate.remainingSeconds(tokens: [], from: 0, wpm: wpm), 0,
+                "an empty stream has zero remaining")
+}
+
 print("")
 if failures.isEmpty {
     print("All checks passed ✅")

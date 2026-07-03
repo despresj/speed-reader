@@ -10,7 +10,21 @@ import UIKit
 final class ReaderViewModel {
     private(set) var tokens: [ReadingToken] = []
     private(set) var currentIndex = 0
-    private(set) var state: ReaderState = .idle
+    private(set) var state: ReaderState = .idle {
+        // The one choke point every transition flows through — pause, background
+        // (`pauseForBackground` forces `.paused`), completion, and teardown all
+        // mutate `state`, so the screen-wake side effect can't be forgotten on
+        // any path. didSet never fires for the initial value, hence the explicit
+        // `applyScreenWake()` at the end of `init`.
+        didSet { applyScreenWake() }
+    }
+
+    /// Mirrors `ScreenWake.shouldStayAwake` into UIKit: the screen stays lit
+    /// while words advance (a cruise has no touches to keep it awake) and the
+    /// idle timer is restored the moment the reader parks.
+    private func applyScreenWake() {
+        UIApplication.shared.isIdleTimerDisabled = ScreenWake.shouldStayAwake(state)
+    }
 
     /// Bumped whenever the reader settles somewhere the paused Threadline should
     /// recenter on: entering pause, and each scrub step while paused. The viewport
@@ -190,6 +204,9 @@ final class ReaderViewModel {
         // Open at the user's preferred default speed so a cold start agrees with the
         // Settings choice rather than the hardcoded cruise constant.
         band = defaultCruisingBand
+        // Property initialization skips didSet, so put the idle timer in a known
+        // state for a fresh launch explicitly.
+        applyScreenWake()
     }
 
     /// The text currently loaded into the reader, so re-grabbing the clipboard
@@ -322,6 +339,16 @@ final class ReaderViewModel {
     /// background glow, dial, pivot letter, and progress bar all warm as you
     /// throttle up. Updates reactively whenever the band changes.
     var speedWarmth: Double { band.warmth }
+
+    /// Time left in the current read at the live speed — "~4 min", "~0:42" —
+    /// answering "can I finish this?" instead of reporting progress math. Shown
+    /// only while parked or scrubbing; never a live countdown during playback.
+    /// Empty when nothing is loaded so callers can simply hide it.
+    var remainingTimeLabel: String {
+        guard !tokens.isEmpty else { return "" }
+        return "~" + ReadTimeEstimate.compact(
+            ReadTimeEstimate.remainingSeconds(tokens: tokens, from: currentIndex, wpm: wpm))
+    }
 
     // MARK: Read-time estimate ("time at default")
 

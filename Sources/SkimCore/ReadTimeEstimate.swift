@@ -16,6 +16,19 @@ public enum ReadTimeEstimate {
         }
     }
 
+    /// Seconds left from a position in the stream — the same honest per-token
+    /// arithmetic as `seconds(tokens:wpm:)`, summed over `tokens[index...]` only,
+    /// so a paragraph-heavy tail estimates longer than a flat one. Answers the
+    /// human question ("can I finish this?") rather than reporting progress math.
+    /// An index at or before the start yields the full total; at or past the end,
+    /// zero.
+    public static func remainingSeconds(tokens: [ReadingToken], from index: Int, wpm: Int) -> Double {
+        let start = max(0, min(index, tokens.count))
+        return tokens[start...].reduce(0.0) {
+            $0 + Pacing.secondsPerToken(wpm: Double(wpm), multiplier: $1.delayMultiplier)
+        }
+    }
+
     /// Convenience: tokenize `text` with Skim's tokenizer, then estimate at `wpm`.
     public static func seconds(text: String, wpm: Int) -> Double {
         seconds(tokens: Tokenizer.tokenize(text), wpm: wpm)

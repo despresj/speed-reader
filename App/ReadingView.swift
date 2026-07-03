@@ -455,6 +455,19 @@ struct ReadingView: View {
             // below it, with the progress line pinned beneath — so the prose stops
             // fighting the safe area and reads as part of a settled lower cluster.
             Spacer(minLength: 0).frame(height: height * 0.13)
+            // "Can I finish this?" — a faint time-left over the progress line's
+            // trailing end. It belongs to the *resting* surface: present with the
+            // pause chrome, gone the moment words stream, and never a live countdown
+            // (it re-renders on pause/scrub, not per token).
+            Text(viewModel.remainingTimeLabel.isEmpty ? "" : "\(viewModel.remainingTimeLabel) left")
+                .font(.system(size: 12, weight: .medium))
+                .monospacedDigit()
+                .foregroundStyle(Color.readingMuted)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.horizontal, 28)
+                .padding(.bottom, 8)
+                .opacity(viewModel.shouldShowPauseChrome ? 1 : 0)
+                .animation(.easeOut(duration: 0.22), value: viewModel.shouldShowPauseChrome)
             ProgressLine(progress: viewModel.progress, warmth: viewModel.speedWarmth)
                 .padding(.horizontal, 28)
                 // Raised off the bottom safe area for clean breathing room above
@@ -1718,8 +1731,7 @@ private struct ProgressScrubber: View {
                     .animation(.easeOut(duration: 0.16), value: dragging)
 
                 if dragging {
-                    ScrubReadout(index: viewModel.currentIndex,
-                                 total: viewModel.wordCount,
+                    ScrubReadout(timeLeft: viewModel.remainingTimeLabel,
                                  progress: p)
                         // Floats above the line; not clipped by the strip bounds.
                         .position(x: w / 2, y: -14)
@@ -1746,16 +1758,16 @@ private struct ProgressScrubber: View {
     }
 }
 
-/// The transient scrub position readout — token position and percent — in the
-/// same calm translucent pill as the flick flash, so it reads as the same quiet
-/// family. Subtle and non-modal; only ever up while a finger is on the scrubber.
+/// The transient scrub position readout — time left first (the human question:
+/// "can I finish this?"), percent as the quiet secondary — in the same calm
+/// translucent pill as the flick flash, so it reads as the same quiet family.
+/// Subtle and non-modal; only ever up while a finger is on the scrubber.
 private struct ScrubReadout: View {
-    let index: Int
-    let total: Int
+    let timeLeft: String
     let progress: Double
 
     var body: some View {
-        Text("\(index + 1) / \(total.formatted())  ·  \(Int((progress * 100).rounded()))%")
+        Text("\(timeLeft) left  ·  \(Int((progress * 100).rounded()))%")
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(Color.readingForeground)
             .monospacedDigit()
