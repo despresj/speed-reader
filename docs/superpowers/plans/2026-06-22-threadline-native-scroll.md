@@ -1,5 +1,8 @@
 # Premium Native-Scroll Paused Threadline — Implementation Plan
 
+> **Historical implementation plan — completed and later refined.** Do not
+> execute these steps against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the paused Threadline a native, momentum-scrolling inspection surface where dragging scrolls, a still press-and-hold reads, double-tap cruises, and an amber locator returns you to the active word.

@@ -1,7 +1,8 @@
 # Edge Speed Slider for Paused Threadline + Relocated Return-to-Word — Design
 
 Date: 2026-06-23
-Status: Approved (pending implementation plan)
+Status: Historical — implemented as an intermediate design, then evolved by
+whole-surface steering and the current paused layout.
 
 In paused Threadline mode the circular speed gauge (`SpeedDial`, 118pt reserved
 lane) steals too much lateral space and visually competes with the context, and

@@ -1,10 +1,9 @@
 # Clause-granularity replay flick
 
 **Date:** 2026-06-19
-**Status:** ❌ Superseded — not built. Replaced by fixed 12-word rail flicks
-(see `2026-06-19-cruise-and-12-word-navigation-design.md`). Sentence/clause
-semantic replay was dropped in favor of a predictable fixed jump; left here for
-the design rationale only.
+**Status:** Historical — this proposal was not built. Fixed 12-word navigation
+replaced it temporarily, and shipped semantic sentence replay later superseded
+that behavior. Retained only for decision history; see [`../../README.md`](../../README.md).
 **Scope:** `SkimCore` (new semantic index) + `App/` (gesture + view-model + haptics).
 
 ## Motivation

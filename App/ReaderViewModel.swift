@@ -447,10 +447,10 @@ final class ReaderViewModel {
         readPasteboard()
     }
 
-    /// Route an inbound `skim://read` deep link. Text loads straight into the
-    /// reader (armed in `.ready`, no autoplay); a URL is parked on the fallback
-    /// card. Invalid/empty links are ignored so they never disturb a current
-    /// read or crash. The link is authoritative over the clipboard: we bank the
+    /// Route an inbound `skim://read` deep link. Text loads straight into
+    /// hands-free Cruise at the configured default speed; a URL is parked on the
+    /// fallback card. Invalid/empty links are ignored so they never disturb a
+    /// current read or crash. The link is authoritative over the clipboard: we bank the
     /// current pasteboard change count up front so the foreground re-read can't
     /// clobber the link or trigger iOS's paste prompt (resolves the cold-launch
     /// race between `onOpenURL` and `scenePhase == .active`, in either order).
@@ -488,8 +488,8 @@ final class ReaderViewModel {
     /// large text: the file carries the whole document (no URL truncation) and we
     /// read it directly, so the pasteboard is never touched. Reads UTF-8, trims,
     /// and quietly ignores an empty/unreadable file (no paste screen, no error),
-    /// then loads straight into hands-free cruise at the brisk import speed — no
-    /// `.ready` pause, preserving the selected hand and current UI. Like the deep
+    /// then loads straight into hands-free Cruise at the configured default speed —
+    /// no `.ready` pause, preserving the selected hand and current UI. Like the deep
     /// link, the file is authoritative over the clipboard, so we bank the change
     /// count up front to neutralize the cold-launch foreground re-read race.
     func handleFileURL(_ url: URL) {

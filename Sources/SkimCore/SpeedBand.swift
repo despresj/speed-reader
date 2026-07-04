@@ -50,10 +50,11 @@ public struct SpeedBand: Equatable, Sendable {
 
     /// Reading "temperature" of this speed, normalized 0…1 across the full band
     /// range: 0 at the slowest band, 1 at the fastest. The view layer maps this
-    /// onto a subtle amber warmth (background glow, dial, pivot, progress) so the
-    /// surface feels calmer when slow and more energized when fast — an *energy*
-    /// state, never an alarm. Pure number here; the palette mapping stays in the
-    /// views. Tracks the dial fill exactly, since both span `minWPM…maxWPM`.
+    /// through the selected theme's accent ramp (background, dial, pivot,
+    /// progress), so the surface feels calmer when slow and more energized when
+    /// fast — an *energy* state, never an alarm. Pure number here; palette mapping
+    /// stays in the views. Tracks the dial fill exactly, since both span
+    /// `minWPM…maxWPM`.
     public var warmth: Double {
         let span = Double(Self.maxWPM - Self.minWPM)
         guard span > 0 else { return 0 }

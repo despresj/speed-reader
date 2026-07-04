@@ -1,5 +1,8 @@
 # Reader Top Nav Bar + Overflow Menu Implementation Plan
 
+> **Historical implementation plan — completed.** Do not execute these steps
+> against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the Reader's left vertical utility rail with a parked-only top bar — `‹ Reads` (top-left navigation) and a `…` overflow menu (top-right tools) — and give the Threadline more room.

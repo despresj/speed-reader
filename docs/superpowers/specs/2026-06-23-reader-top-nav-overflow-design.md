@@ -1,7 +1,7 @@
 # Reader Top Nav Bar + Overflow Menu — Design
 
 Date: 2026-06-23
-Status: Approved (pending implementation plan)
+Status: Historical — implemented.
 
 Replace the Reader's left vertical utility rail with a simple top
 navigation/menu pattern: `‹ Reads` at the top-left (app navigation), a `…`

@@ -1,5 +1,8 @@
 # Comprehension Checks — OpenAI & UI Implementation Plan (Plan 2 of 2)
 
+> **Historical implementation plan — completed.** Do not execute these steps
+> against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Wire Plan 1's tested SkimCore foundation into the running iOS app — a BYOK OpenAI provider, a `@MainActor` orchestration service that pre-generates on paste, Settings/consent/question/result UI — so a reader who has opted in gets an optional, calm comprehension check after a long read.

@@ -1,5 +1,8 @@
 # Read in Skim — Deep-Link Input Path Implementation Plan
 
+> **Historical implementation plan — completed and later extended.** Do not
+> execute these steps against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Let users send text or a URL into Skim from iOS Shortcuts via a `skim://read` deep link — text lands armed on the reading surface, a URL lands on a calm fallback card — without a paste prompt or autoplay.

@@ -1,7 +1,8 @@
 # Comprehension Checks (BYOK V0) — Design
 
 **Date:** 2026-06-25
-**Status:** Approved design, pre-implementation
+**Status:** Historical — BYOK comprehension core, persistence, OpenAI transport,
+consent, settings, question flow, and review UI are implemented.
 **Author:** Joe + Claude (brainstorm)
 
 ## Purpose

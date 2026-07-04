@@ -1,5 +1,8 @@
 # Comprehension Checks — Core & Storage Implementation Plan (Plan 1 of 2)
 
+> **Historical implementation plan — completed.** Do not execute these steps
+> against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the pure, fully-tested foundation for BYOK comprehension checks — models, question-planning, quote normalization, response validation, long-read chunking, scoring, the SQLite tables + CRUD, and the API-key-store protocol — entirely inside `SkimCore`, verified by `CoreChecks`.

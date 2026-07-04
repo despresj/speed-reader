@@ -1,5 +1,8 @@
 # Copy Current Text & Recents Access Implementation Plan
 
+> **Historical implementation plan — completed.** Do not execute these steps
+> against the current tree. See [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a Copy control to the parked reading surface that copies the full read text with a calm in-place confirmation, and give the Paste/New Text screen a path to the saved-reads shelf (`Recents` when standalone, `‹ Reads` when truly going back).

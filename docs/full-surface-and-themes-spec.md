@@ -1,5 +1,8 @@
 # Full-surface controls, instant pause context, and color themes
 
+> **Status: shipped design record.** Retained for rationale; not active backlog.
+> See [`README.md`](README.md) for current documentation authority.
+
 Three changes to the reading surface, in the spirit of the product philosophy:
 the surface stays sacred, controls stay physical, and everything the eye meets
 stays calm.

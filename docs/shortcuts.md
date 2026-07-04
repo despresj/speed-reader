@@ -4,8 +4,8 @@ Skim accepts text and URLs through its `skim://read` deep link, so any Shortcut
 that opens one of these URLs feeds the reader:
 
 - `skim://read?text=<url-encoded text>` → reader opens directly in **On mode**
-  (hands-free cruise) at **400 wpm** and starts reading immediately — no paste
-  prompt, no thumb start. A single tap pauses.
+  (hands-free cruise) at the configured default cruising speed and starts
+  reading immediately — no paste prompt, no thumb start. A single tap pauses.
 - `skim://read?url=<url-encoded url>` → calm **"Link received"** card with
   **Open Link** (article extraction is coming; v1 doesn't RSVP raw URLs).
 
@@ -20,8 +20,8 @@ Rules baked into the app (`DeepLinkParser`):
 ## ⭐ Read in Skim (Share Sheet) — the primary flow
 
 Select text in any app (ChatGPT, Safari, Notes, Mail…), tap **Share**, tap
-**Read in Skim**, and Skim opens straight into On mode at 400 wpm, already
-reading that text hands-free.
+**Read in Skim**, and Skim opens straight into On mode at the configured default
+speed, already reading that text hands-free.
 
 **Build it in the Shortcuts app → New Shortcut:**
 
@@ -41,7 +41,8 @@ reading that text hands-free.
 4. **Open URLs** — input: the **Text** from step 3.
 
 That's it. Selecting text anywhere and tapping **Read in Skim** opens Skim in
-On mode at 400 wpm, already reading. Empty selections fail quietly.
+On mode at the configured default speed, already reading. Empty selections fail
+quietly.
 
 ### Optional: prefer the URL path when a URL is shared
 
@@ -96,10 +97,10 @@ Trigger each via the Share Sheet, a Shortcut, or by pasting the URL into Safari'
 address bar:
 
 - [ ] Select text in ChatGPT/Safari/Notes → Share → **Read in Skim** appears.
-- [ ] Tapping it opens Skim **already reading in On mode at 400 wpm** — no tap to
-      start. A single tap pauses.
+- [ ] Tapping it opens Skim **already reading in On mode at the configured
+      default speed** — no tap to start. A single tap pauses.
 - [ ] `skim://read?text=Hello%20world` on **cold launch** (force-quit first) →
-      opens reading "Hello world" hands-free at 400 wpm.
+      opens reading "Hello world" hands-free at the configured default speed.
 - [ ] Same link while **already running** → swaps in the new text and starts
       reading it in On mode.
 - [ ] Same link from **background** (not quit) → foregrounds and starts reading

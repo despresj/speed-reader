@@ -1,5 +1,11 @@
 # Casual RSVP Reader iPhone App Spec
 
+> **Historical product brief.** This document established the original product
+> direction, but its feature lists, constants, and build order no longer describe
+> the current app. Use [`docs/README.md`](docs/README.md) for documentation
+> authority and [`docs/trance-pass-spec.md`](docs/trance-pass-spec.md) for the
+> active roadmap. Retained for product rationale and early design context.
+
 ## Working Name
 
 **Skim**  

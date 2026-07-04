@@ -1,7 +1,8 @@
 # Premium native scroll for the paused Threadline
 
 **Date:** 2026-06-22
-**Status:** Approved design — ready for implementation plan
+**Status:** Historical — implemented; later work added instant initial centering
+and cross-dissolved far recentering.
 **Area:** `App/Threadline.swift`, `App/ReadingView.swift`, `App/ReaderViewModel.swift`
 
 ## Problem

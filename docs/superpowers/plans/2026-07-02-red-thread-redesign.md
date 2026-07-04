@@ -1,5 +1,9 @@
 # Red Thread Redesign Implementation Plan
 
+> **Historical implementation plan — completed and later generalized into five
+> themes.** Do not execute these steps against the current tree. See
+> [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reskin Skim from the warm "lamplight" identity to the "Red Thread" identity — cool paper/ink neutrals, a reserved vermillion accent, serif display type, flat ink buttons, and a light motion pass — per `docs/superpowers/specs/2026-07-01-red-thread-redesign-design.md`.

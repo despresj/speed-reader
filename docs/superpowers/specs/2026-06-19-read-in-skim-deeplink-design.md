@@ -1,6 +1,8 @@
 # Design: "Read in Skim" deep-link input path
 
-**Status:** approved (brainstorm), ready for implementation plan
+**Status:** Historical — implemented and later extended with automatic Cruise
+startup and plain-text file imports. Current usage lives in
+[`../../shortcuts.md`](../../shortcuts.md).
 **Date:** 2026-06-19
 
 ## Purpose

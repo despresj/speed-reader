@@ -1,7 +1,8 @@
 # Back-to-edit control + speed dial + refined palette
 
 **Date:** 2026-06-19
-**Status:** Approved (design), pending implementation
+**Status:** Historical — implemented; later surface-control and theme work evolved
+the visual and gesture details.
 **Scope:** App layer only (`App/`). No `SkimCore` changes.
 
 ## Motivation

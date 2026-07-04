@@ -1,7 +1,8 @@
 # Pleasure Pass: Semantic Replay, Resume Glide, Sensory Polish
 
 **Date:** 2026-07-02
-**Status:** Approved
+**Status:** Historical — semantic replay, resume glide, paragraph breath, and
+sensory polish are implemented.
 
 Three improvements that close the gap between the app as built and the product
 spec's "hand-in-glove" feel (`rsvp_casual_reader_spec.md`). No new screens, no

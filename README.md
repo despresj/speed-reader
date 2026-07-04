@@ -1,89 +1,98 @@
 # Skim
 
-A clipboard-first, one-thumb RSVP reading app for iPhone. Copy text, open the
-app, hold your thumb on the right side of the screen — it reads to your eyes.
+Skim is a clipboard-first reading instrument for iPhone. It delivers text at a
+controlled cadence so the reader can focus on comprehension instead of scrolling
+and self-pacing.
 
-This repo is the **minimal v1 slice**: clipboard load → tokenize → centered word
-display → WPM-paced playback with punctuation rhythm → invisible right-thumb
-hold-to-read with haptics. See `rsvp_casual_reader_spec.md` for the full vision
-and `~/.claude/plans/` for the build plan.
+Copy or import text, then hold anywhere to read or double-tap for hands-free
+Cruise. Slide vertically to change speed, flick horizontally to replay or skip a
+sentence, and release or tap to return to the surrounding prose.
 
-## Layout
+## Current capabilities
 
+- Clipboard and manual text input.
+- `skim://read` deep links and plain-text file imports.
+- ORP-anchored word display with punctuation, long-word, number, and paragraph
+  pacing.
+- Hold-to-read, Cruise, whole-surface speed steering, and sentence navigation.
+- Paused Threadline context, progress scrubbing, remaining-time estimates, and
+  eased resume behavior.
+- Local recents, resume positions, completion review, and an ideas scratchpad.
+- Five system-aware color themes.
+- MP4 and GIF export.
+- Optional BYOK OpenAI comprehension checks.
+
+Phrase reading is the main unfinished product capability. The current delivery
+order is maintained in [docs/trance-pass-spec.md](docs/trance-pass-spec.md).
+
+## Repository layout
+
+```text
+App/                  SwiftUI application, UIKit bridges, export, and services
+Sources/SkimCore/     Pure reading, persistence, and comprehension logic
+Sources/CoreChecks/   Dependency-free core verification executable
+docs/                 Active documentation and historical design records
+Package.swift         SwiftPM manifest for SkimCore and CoreChecks
+project.yml           XcodeGen definition for the iOS application
 ```
-Sources/SkimCore/   Pure reading logic (no UIKit/SwiftUI) — tokenizer, pacing, models
-Sources/CoreChecks/     Self-check executable that verifies the core (runs without Xcode)
-App/                    SwiftUI app shell — view model, views, haptics
-Package.swift           SwiftPM manifest for the core + checks
-project.yml             xcodegen definition for the iOS app
-```
 
-The iOS app target compiles `App/` and `Sources/SkimCore/` together as one
-module (so the app code uses the core types directly, no `import`).
+The iOS target compiles `App/` and `Sources/SkimCore/` into one module. The
+SwiftPM package keeps the core independently buildable on macOS.
 
-## Verify the core (no Xcode needed)
+## Documentation
+
+Start with [docs/README.md](docs/README.md). It identifies the active roadmap,
+focused implementation specs, product philosophy, and historical archive.
+
+The original [rsvp_casual_reader_spec.md](rsvp_casual_reader_spec.md) is retained
+as historical product context; it is no longer the implementation authority.
+
+## Verify the core
 
 ```sh
-swift build          # compiles SkimCore under Swift 6
-swift run CoreChecks # asserts tokenizer / pacing / speed-band behavior
+swift build
+swift run CoreChecks
 ```
 
-> Note: a normal XCTest/swift-testing target can't build with only the Command
-> Line Tools (those test modules ship inside Xcode). `CoreChecks` is the
-> dependency-free stand-in; promote it to XCTest once full Xcode is installed.
+`CoreChecks` is the repository's dependency-free assertion suite. Add matching
+checks whenever core behavior changes.
 
-## Build & run the app (needs Xcode)
+## Build the iOS app
 
-```sh
-brew install xcodegen   # if not already installed
-xcodegen generate       # regenerates Skim.xcodeproj
-open Skim.xcodeproj  # then Run on an iPhone simulator or device
-```
-
-Try it: copy a paragraph → launch → the first word waits → press and hold the
-right ~38% of the screen to read → release to pause → reaching the end gives a
-finish haptic and a "Read again" prompt. Empty clipboard shows the paste screen.
-
-## Deploy to a device from the command line (no Xcode GUI / over SSH)
-
-Build and install onto a paired iPhone (USB or network) headlessly:
+Requires Xcode and XcodeGen:
 
 ```sh
-./deploy.sh                        # build + install to the connected device
-DEVICE="Joe’s iPhone" ./deploy.sh  # or target a device by name
-```
-
-`deploy.sh` runs `xcodegen generate`, builds a signed device build with
-`xcodebuild -destination 'generic/platform=iOS' -allowProvisioningUpdates`, then
-installs the `.app` with `xcrun devicectl device install app`. Code signing uses
-the personal team already set in `project.yml` (`DEVELOPMENT_TEAM`,
-`CODE_SIGN_STYLE: Automatic`). The raw one-liners, if you'd rather not use the
-script:
-
-```sh
+brew install xcodegen   # if needed
 xcodegen generate
-xcodebuild -project Skim.xcodeproj -scheme Skim -configuration Debug \
-  -destination 'generic/platform=iOS' -derivedDataPath .build/ios \
-  -allowProvisioningUpdates build
-xcrun devicectl device install app --device "Joe’s iPhone" \
-  .build/ios/Build/Products/Debug-iphoneos/Skim.app
+xcodebuild -project Skim.xcodeproj -scheme Skim \
+  -destination 'generic/platform=iOS Simulator' build
 ```
 
-**Over SSH:** code signing needs the login keychain unlocked. If a build fails
-with `errSecInternalComponent` / "User interaction is not allowed", unlock it
-first in the SSH session:
+Or open the generated project:
+
+```sh
+open Skim.xcodeproj
+```
+
+`Skim.xcodeproj` is generated and ignored. Edit `project.yml`, not the project
+file.
+
+Set `SKIM_SAMPLE` in the launch environment to preload text during development.
+
+## Deploy to a paired iPhone
+
+After a green build:
+
+```sh
+scripts/deploy-device.sh
+```
+
+The script regenerates the project, builds, installs, and launches only if the
+device build succeeds. Over SSH, the login keychain may need to be unlocked
+before code signing:
 
 ```sh
 security unlock-keychain ~/Library/Keychains/login.keychain-db
 ```
 
-List paired devices any time with `xcrun devicectl list devices`. The phone must
-be paired and within range; network ("wireless") pairing is set up once in
-Xcode's Devices window, after which no cable is needed.
-
-## Not in this slice (next passes)
-
-Vertical-slide speed bands, flick-left replay / flick-right skip, pause context,
-cruise (double-tap autoplay), first-run overlay, settings, recent sessions,
-phrase/dense chunking. Sentence & paragraph indices are already emitted by the
-tokenizer so the recovery features drop in cleanly later.
+List paired devices with `xcrun devicectl list devices`.

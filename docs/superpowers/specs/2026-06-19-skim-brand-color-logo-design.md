@@ -1,5 +1,9 @@
 # Skim — Brand, Color & Logo Brief
 
+> **Status: historical direction.** The app icon shipped; the original color
+> direction was superseded by Red Thread and the five-theme palette. Retained for
+> brand rationale, not as current implementation guidance.
+
 *Design direction for the visual designer. Prepared 2026-06-19.*
 
 This document hands off two things: a **formalized color system** (already

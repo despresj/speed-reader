@@ -71,9 +71,9 @@ Three commitments fall out of that:
 
 Each of these already lives in the codebase, and each is a direct expression of the doctrine — not a feature bolted on for completeness.
 
-1. **The invisible thumb rail (hold-to-read).** Your body is the controller. Holding *is* the engagement; releasing is an honest pause. You are physically holding the discipline. This is the doctrine made literal.
-2. **The sacred surface.** A single centered word on a warm reading-by-lamplight ground, no chrome. It removes the page-as-battlefield so attention has nowhere to leak (§1).
-3. **Semantic recovery — Threadline.** Pause and the surrounding prose rises at the foot of the screen, the active word in amber, natively scrollable; flick-left replays the sentence. *Recovery matters more than speed.* You're allowed to fall, because you'll always be caught — which is what makes it safe to let go and be carried (§2).
+1. **The whole surface as controller.** Your body is the controller. Holding *is* the engagement; releasing is an honest pause. Sliding adjusts cadence and a sideways flick recovers meaning without hunting for a control. You are physically holding the discipline. This is the doctrine made literal.
+2. **The sacred surface.** One anchored reading unit on a quiet ink-and-paper field, with no persistent toolbar competing for attention. It removes the page-as-battlefield so attention has nowhere to leak (§1).
+3. **Semantic recovery — Threadline.** Pause and the surrounding prose rises at the foot of the screen, the active unit marked by the theme's thread color and natively scrollable; flick-left replays the sentence. *Recovery matters more than speed.* You're allowed to fall, because you'll always be caught — which is what makes it safe to let go and be carried (§2).
 4. **The grounded comprehension check.** Questions about the main thread, never trivia, never punitive, with a "this seems off" flag so a bad item never reads as *your* failure. This is what turns reading into *verified extraction* and powers the repeat-use loop (§3). It is the single feature that earns the right to drop "speed reader."
 5. **Pacing as rhythm.** Punctuation and paragraph multipliers give the stream breath — a comma is a beat, a period a rest, a paragraph an inhale. The instrument reads *with* the meaning, not merely fast. Calm, not frantic.
 

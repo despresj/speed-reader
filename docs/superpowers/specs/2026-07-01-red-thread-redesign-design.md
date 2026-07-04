@@ -1,7 +1,8 @@
 # Red Thread Redesign — Design Spec
 
 **Date:** 2026-07-01
-**Status:** Approved direction, pending spec review
+**Status:** Historical — implemented and subsequently generalized into five
+selectable light/dark themes.
 
 ## Why
 

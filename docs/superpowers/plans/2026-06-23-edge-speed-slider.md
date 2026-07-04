@@ -1,5 +1,9 @@
 # Edge Speed Slider + Relocated Return-to-Word Implementation Plan
 
+> **Historical implementation plan — completed as an intermediate design and
+> later evolved.** Do not execute these steps against the current tree. See
+> [`../../README.md`](../../README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** In paused Threadline mode, replace the 118pt circular speed gauge with a slim, directly-draggable edge speed slider and move the return-to-word button out of the Threadline scroll box into that same edge lane, giving Threadline ~110pt more width.

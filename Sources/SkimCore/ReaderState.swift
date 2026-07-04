@@ -7,12 +7,13 @@ public enum ReaderState: Sendable {
     case ready         // text loaded, waiting for the first hold
     case precisionHeld // actively advancing while the thumb is held
     case paused        // thumb released mid-read
-    case cruisePlaying // hands-free autoplay (entered by double-tapping the canvas)
+    case cruisePlaying // hands-free autoplay (entered by double-tap or auto-start)
     case completed     // reached the end of the text
 }
 
-/// How the user drives playback. v1 ships `precisionHeld`; `cruise` is wired
-/// for a later slice.
+/// How the user drives playback. Both modes are shipped: a held thumb drives
+/// precision reading, while Cruise advances hands-free after a double-tap or
+/// configured auto-start.
 public enum ReadingMode: Sendable {
     case precisionHeld // hold to read, release to pause
     case cruise        // double-tap autoplay, tap to pause

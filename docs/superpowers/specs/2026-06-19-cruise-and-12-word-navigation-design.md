@@ -1,7 +1,8 @@
 # Cruise mode + 12-word rewind / fast-forward
 
 **Date:** 2026-06-19
-**Status:** Implemented (App + one `SkimCore` enum case); pending on-device feel check.
+**Status:** Historical — Cruise shipped. Fixed 12-word navigation was later
+replaced by semantic sentence replay.
 **Scope:** `SkimCore/ReaderState`, `App/ReaderViewModel`, `App/ReadingView`, `App/Haptics`.
 
 ## Decision
