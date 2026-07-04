@@ -19,8 +19,8 @@ summaries, dashboards, and additional settings knobs.
 | Pass | State | Notes |
 |---|---|---|
 | 1. Screen wake + time left | Shipped | Implemented with CoreChecks coverage. |
-| 2. Text cleanup | Planned | Requires a separate implementation spec and fixtures. |
-| 3. Phrase reading | Planned | Tokenizer hardening is specified separately; chunking still needs its own final spec. |
+| 2. Text cleanup | Shipped | `TextCleanup.clean` and fixtures land in [`text-cleanup-spec.md`](text-cleanup-spec.md), wired into the reader ingest path (`ReaderViewModel.load`). The single-strip seam is a later cleanup. |
+| 3. Phrase reading | Tokenizer shipped | `Tokenizer` emits explicit boundaries per [`tokenizer-spec.md`](tokenizer-spec.md); phrase chunking still needs its own final spec. |
 | 4. First-read lesson | Planned | Starts only after phrase reading is validated on device. |
 
 Tokenizer behavior is defined in [`tokenizer-spec.md`](tokenizer-spec.md). That
@@ -65,14 +65,15 @@ tokenization. It may remove mechanical debris, but it must not rewrite prose.
 Candidate responsibilities:
 
 - normalize non-semantic whitespace and invisible characters;
-- collapse raw URLs to readable domains;
-- remove tightly recognized citation markers;
+- remove standalone URLs and replace inline URLs with `[link]`;
+- remove tightly recognized numeric citation markers;
 - remove exact-match newsletter, social, advertisement, and credit lines;
-- repair unambiguous line-wrap hyphenation.
+- repair unambiguous line wrapping.
 
-Before implementation, this pass needs a dedicated spec containing complete
-rule tables, complete frozen match sets, ordering, idempotence requirements, and
-false-positive fixtures. Partial lists or fuzzy prose rules are not sufficient.
+The dedicated spec is [`text-cleanup-spec.md`](text-cleanup-spec.md): it holds the
+complete rule tables, frozen match sets, operation ordering, idempotence
+requirements, and false-positive fixtures. Partial lists or fuzzy prose rules are
+not sufficient.
 
 The cleanup contract is conservative:
 
@@ -135,9 +136,14 @@ text itself.
 ## Delivery order
 
 1. Ship and verify screen wake plus time left. **Complete.**
-2. Finalize the cleanup spec, then implement cleanup with fixtures.
+2. Finalize the cleanup spec, then implement cleanup with fixtures. **Complete**
+   — `TextCleanup.clean` and its fixtures are green and wired into the reader
+   ingest path: `ReaderViewModel.load` runs `clean(strip(raw))`, then tokenizes
+   and persists the cleaned prose. The single-strip seam (dropping the tokenizer's
+   internal re-strip) remains a later cleanup.
 3. Implement [`tokenizer-spec.md`](tokenizer-spec.md) independently and keep word
-   mode green.
+   mode green. **Complete** — the tokenizer emits explicit boundaries with full
+   CoreChecks coverage.
 4. Finalize and implement phrase chunking in pure core.
 5. Migrate app and export consumers in one deployable phrase-reading change.
 6. Feel-test on device.

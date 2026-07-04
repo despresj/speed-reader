@@ -553,8 +553,14 @@ final class ReaderViewModel {
     /// `source` notes where the text came from (manual paste, file, deep link, …).
     func load(_ text: String, source: ReadSource = .manual, sourcePath: String? = nil) {
         cancelPlayback()
+        // `loadedText` keeps the raw source so the clipboard-dedup guard compares
+        // like against like; the reader streams the cleaned prose instead.
         loadedText = text
-        tokens = Tokenizer.tokenize(text)
+        // Strip Markdown, then remove paste debris (URLs, citations, boilerplate)
+        // once, up front. `Tokenizer.tokenize` re-strips internally — an idempotent
+        // no-op on already-clean text — until the single-strip seam lands.
+        let prepared = TextCleanup.clean(Markdown.strip(text)).text
+        tokens = Tokenizer.tokenize(prepared)
         currentIndex = 0
         state = tokens.isEmpty ? .idle : .ready
         hasPendingClipboard = false
@@ -563,7 +569,9 @@ final class ReaderViewModel {
         // A fresh manual read opens at the user's default cruising speed; imports
         // set their own band via `loadAndCruise` after this returns.
         if source == .manual { band = defaultCruisingBand }
-        recordLoadedRead(text, source: source, sourcePath: sourcePath)
+        // Persist the cleaned prose so resume, recents, exports, and read-time all
+        // tokenize the same debris-free text the reader streamed.
+        recordLoadedRead(prepared, source: source, sourcePath: sourcePath)
         // Honor the "start in cruise" preference for manual loads — open hands-free
         // at the default cruising speed (same entry path as imports). An empty load
         // stays idle.

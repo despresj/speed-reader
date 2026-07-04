@@ -5,13 +5,14 @@ so completed implementation plans do not masquerade as current backlog.
 
 ## Active documents
 
-| Document | Purpose |
-|---|---|
-| [`../README.md`](../README.md) | Current product summary, repository layout, and build instructions. |
-| [`skim-product-philosophy.md`](skim-product-philosophy.md) | Product principles and feature filter. |
-| [`trance-pass-spec.md`](trance-pass-spec.md) | Canonical roadmap and delivery order. This is the only active backlog document. |
-| [`tokenizer-spec.md`](tokenizer-spec.md) | Focused implementation draft for tokenizer hardening. |
-| [`shortcuts.md`](shortcuts.md) | Current iOS Shortcut and deep-link integration instructions. |
+| Document                                                   | Purpose                                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`../README.md`](../README.md)                             | Current product summary, repository layout, and build instructions.             |
+| [`skim-product-philosophy.md`](skim-product-philosophy.md) | Product principles and feature filter.                                          |
+| [`trance-pass-spec.md`](trance-pass-spec.md)               | Canonical roadmap and delivery order. This is the only active backlog document. |
+| [`text-cleanup-spec.md`](text-cleanup-spec.md)             | Focused implementation draft for paste-debris cleanup (Pass 2).                 |
+| [`tokenizer-spec.md`](tokenizer-spec.md)                   | Focused implementation draft for tokenizer hardening.                           |
+| [`shortcuts.md`](shortcuts.md)                             | Current iOS Shortcut and deep-link integration instructions.                    |
 
 When active documents disagree, use this precedence:
 
@@ -36,8 +37,8 @@ Shipped:
 
 Active delivery sequence:
 
-1. text-cleanup specification and implementation;
-2. tokenizer hardening from `tokenizer-spec.md`;
+1. text-cleanup specification and implementation — done, wired into the reader ingest path;
+2. tokenizer hardening from `tokenizer-spec.md` — done;
 3. phrase-chunking specification and pure-core implementation;
 4. word-ordinal migration and phrase-reading app/export adoption;
 5. physical-device feel pass;

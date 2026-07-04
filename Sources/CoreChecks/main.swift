@@ -215,6 +215,118 @@ do {
     expectEqual(t[1].sentenceIndex, 1, "3.14. bumps sentenceIndex")
 }
 
+print("Tokenizer (explicit boundaries)")
+do {
+    // Titles never end a sentence; the paragraph-final word gets the breath.
+    let t = Tokenizer.tokenize("Mr. Smith arrived.")
+    expectEqual(t[0].boundary, .none, "Mr. is a title -> .none")
+    expectEqual(t[2].boundary, .paragraph, "paragraph-final arrived. -> .paragraph")
+    expectEqual(t[2].delayMultiplier, 2.8, "paragraph-final gets 2.8")
+}
+do {
+    // Context abbreviation before lowercase prose does not break.
+    let t = Tokenizer.tokenize("etc. this continues")
+    expectEqual(t[0].boundary, .none, "etc. before lowercase -> .none")
+    expectEqual(t[1].sentenceIndex, 0, "no sentence advance after etc. this")
+}
+do {
+    // Context abbreviation before uppercase prose does break.
+    let t = Tokenizer.tokenize("etc. The next sentence")
+    expectEqual(t[0].boundary, .sentence, "etc. before uppercase -> .sentence")
+    expectEqual(t[0].delayMultiplier, 2.0, "context-abbrev sentence break pauses 2.0")
+    expectEqual(t[1].sentenceIndex, 1, "sentence advances after etc. The")
+}
+do {
+    // Initials/acronyms never split; the ordinary period does.
+    let t = Tokenizer.tokenize("J. K. Rowling wrote. Then left.")
+    expectEqual(t[0].boundary, .none, "initial J. -> .none")
+    expectEqual(t[1].boundary, .none, "initial K. -> .none")
+    expectEqual(t[3].boundary, .sentence, "wrote. -> .sentence")
+    expectEqual(t[3].sentenceIndex, 0, "wrote. sits in sentence 0")
+    expectEqual(t[4].sentenceIndex, 1, "Then starts sentence 1")
+    expectEqual(t[5].boundary, .paragraph, "paragraph-final left. -> .paragraph")
+}
+do {
+    let t = Tokenizer.tokenize("No. 5 arrived.")
+    expectEqual(t[0].boundary, .none, "No. is a title -> .none")
+    expectEqual(t[1].sentenceIndex, 0, "No. does not advance sentence")
+}
+do {
+    let t = Tokenizer.tokenize("Jan. 3 arrived.")
+    expectEqual(t[0].boundary, .none, "Jan. before a digit -> .none")
+}
+do {
+    let t = Tokenizer.tokenize("Wait… this continues")
+    expectEqual(t[0].boundary, .clause, "ellipsis before lowercase -> .clause")
+    expectEqual(t[0].delayMultiplier, 2.0, "ellipsis always rests 2.0")
+    expectEqual(t[1].sentenceIndex, 0, "clause ellipsis does not advance sentence")
+}
+do {
+    let t = Tokenizer.tokenize("Wait… This restarts")
+    expectEqual(t[0].boundary, .sentence, "ellipsis before uppercase -> .sentence")
+    expectEqual(t[0].delayMultiplier, 2.0, "ellipsis sentence still rests 2.0")
+    expectEqual(t[1].sentenceIndex, 1, "sentence ellipsis advances")
+}
+do {
+    let t = Tokenizer.tokenize(#"end.") Next"#)
+    expectEqual(t[0].boundary, .sentence, "closer-skipped period -> .sentence")
+    expectEqual(t[0].delayMultiplier, 2.0, "closer-skipped sentence pauses 2.0")
+    expectEqual(t[1].sentenceIndex, 1, "Next starts a new sentence")
+}
+do {
+    // Ordinary period ends a sentence even before a digit.
+    let t = Tokenizer.tokenize("He left. 40 remained.")
+    expectEqual(t[1].boundary, .sentence, "left. -> .sentence before a digit")
+    expectEqual(t[1].delayMultiplier, 2.0, "ordinary period pauses 2.0")
+    expectEqual(t[2].sentenceIndex, 1, "40 starts sentence 1")
+    expectEqual(t[3].boundary, .paragraph, "paragraph-final remained. -> .paragraph")
+}
+do {
+    // Ordinary period ends a sentence even before lowercase.
+    let t = Tokenizer.tokenize("done. next here")
+    expectEqual(t[0].boundary, .sentence, "done. -> .sentence before lowercase")
+}
+do {
+    let t = Tokenizer.tokenize("alpha beta\n\ngamma")
+    expectEqual(t[1].boundary, .paragraph, "paragraph-final beta -> .paragraph")
+    expectEqual(t[1].sentenceIndex, 0, "beta sits in sentence 0")
+    expectEqual(t[2].sentenceIndex, 1, "gamma starts sentence 1")
+}
+do {
+    // Closer-stripped title abbreviation.
+    let t = Tokenizer.tokenize(#""Dr." Smith arrived."#)
+    expectEqual(t[0].boundary, .none, "quoted \"Dr.\" -> .none")
+}
+do {
+    // Closer-stripped context abbreviation before uppercase.
+    let t = Tokenizer.tokenize(#""etc." The next sentence"#)
+    expectEqual(t[0].boundary, .sentence, "quoted \"etc.\" before uppercase -> .sentence")
+    expectEqual(t[1].sentenceIndex, 1, "sentence advances after quoted etc.")
+}
+do {
+    // Ordinary hyphen is not a clause dash.
+    let t = Tokenizer.tokenize("state-of-the-art model shipped.")
+    expectEqual(t[0].boundary, .none, "hyphenated term -> .none")
+}
+do {
+    // Internal em dash is a clause boundary.
+    let t = Tokenizer.tokenize("alpha—beta shipped.")
+    expectEqual(t[0].boundary, .clause, "internal em dash -> .clause")
+    expectEqual(t[0].delayMultiplier, 1.4, "internal em dash pauses 1.4")
+}
+do {
+    // A terminal decimal ends the sentence; a bare decimal does not.
+    let t = Tokenizer.tokenize("The value was 3.14. Then left.")
+    expectEqual(t[3].boundary, .sentence, "3.14. -> .sentence")
+    expectEqual(t[3].delayMultiplier, 2.0, "3.14. pauses 2.0")
+    expectEqual(t[4].sentenceIndex, 1, "Then starts a new sentence")
+}
+do {
+    // A bare decimal carries no boundary.
+    let t = Tokenizer.tokenize("3.14 is pi.")
+    expectEqual(t[0].boundary, .none, "bare 3.14 -> .none")
+}
+
 print("Markdown")
 do {
     expectEqual(Markdown.strip("**bold** and *italic*"), "bold and italic", "unwraps bold and italic")
@@ -1295,6 +1407,87 @@ do {  // plain scope — these checks don't throw
     // Empty stream: nothing to read, nothing left.
     expectClose(ReadTimeEstimate.remainingSeconds(tokens: [], from: 0, wpm: wpm), 0,
                 "an empty stream has zero remaining")
+}
+
+print("TextCleanup")
+@MainActor
+func cleaned(_ input: String) -> String { TextCleanup.clean(input).text }
+do {
+    expectEqual(cleaned(" alpha    beta      gamma "), "alpha beta gamma", "collapse horizontal whitespace and trim edges")
+    expectEqual(cleaned("alpha\n\n\n\nbeta"), "alpha\n\nbeta", "collapse 3+ blank lines to one")
+    expectEqual(cleaned("This sentence was copied from\na narrow column and continues."),
+                "This sentence was copied from a narrow column and continues.",
+                "repair a wrapped line that continues lowercase")
+    expectEqual(cleaned("This is done.\nThis starts again."), "This is done.\nThis starts again.",
+                "do not repair across a sentence break")
+    expectEqual(cleaned("- first item\n- second item"), "- first item\n- second item",
+                "do not repair list-like lines")
+    expectEqual(cleaned("The result was significant [1]."), "The result was significant.",
+                "remove a bracketed numeric citation")
+    expectEqual(cleaned("Backed by many [1][2][3]."), "Backed by many.",
+                "remove a compact citation run")
+    expectEqual(cleaned("Backed by many [1, 2, 7]."), "Backed by many.",
+                "remove a comma-separated citation")
+    expectEqual(cleaned("The command [build] failed."), "The command [build] failed.",
+                "preserve non-numeric bracketed prose")
+    expectEqual(cleaned("Before\nhttps://example.com/report\nAfter"), "Before\nAfter",
+                "remove a standalone URL line without merging neighbours")
+    expectEqual(cleaned("Details are at https://example.com/report and will be updated."),
+                "Details are at [link] and will be updated.",
+                "replace an inline URL with [link]")
+    expectEqual(cleaned("Send it to joe@example.com by noon."), "Send it to joe@example.com by noon.",
+                "preserve email addresses")
+    expectEqual(cleaned("Tom &amp; Jerry"), "Tom & Jerry", "decode &amp;")
+    expectEqual(cleaned("Main paragraph.\nSubscribe to our newsletter\nNext paragraph."),
+                "Main paragraph.\nNext paragraph.", "remove a whole boilerplate line")
+    expectEqual(cleaned("The newsletter became the company's main product."),
+                "The newsletter became the company's main product.",
+                "preserve boilerplate words inside prose")
+    expectEqual(cleaned("We use cookies to improve your experience\nThe article starts here."),
+                "The article starts here.", "remove a cookie-consent line")
+    expectEqual(cleaned("Share\nThe story begins."), "The story begins.",
+                "remove an isolated share/navigation line")
+    expectEqual(cleaned("Image: A chart showing revenue growth.\nRevenue increased in Q2."),
+                "Revenue increased in Q2.", "remove an image caption line")
+    expectEqual(cleaned("Figure 2 shows revenue growth."), "Figure 2 shows revenue growth.",
+                "preserve an in-prose Figure reference")
+    expectEqual(cleaned("The company changed its privacy policy after the incident."),
+                "The company changed its privacy policy after the incident.",
+                "preserve privacy-policy inside prose")
+    expectEqual(cleaned(""), "", "empty input -> empty output")
+    expectEqual(cleaned("   \n  \n "), "", "whitespace-only input -> empty output")
+}
+do {
+    // Operations are inspectable.
+    let url = TextCleanup.clean("Before\nhttps://example.com/report\nAfter")
+    expect(url.operations.contains { $0.kind == .removeStandaloneUrl }, "records removeStandaloneUrl")
+    let cite = TextCleanup.clean("The result was significant [1].")
+    expect(cite.operations.contains { $0.kind == .removeBracketCitation }, "records removeBracketCitation")
+}
+do {
+    // Idempotence: cleaning twice equals cleaning once.
+    let inputs = [
+        " alpha    beta      gamma ", "alpha\n\n\n\nbeta",
+        "This sentence was copied from\na narrow column and continues.",
+        "This is done.\nThis starts again.", "- first item\n- second item",
+        "The result was significant [1].", "Backed by many [1][2][3].",
+        "Backed by many [1, 2, 7].", "The command [build] failed.",
+        "Before\nhttps://example.com/report\nAfter",
+        "Details are at https://example.com/report and will be updated.",
+        "Send it to joe@example.com by noon.", "Tom &amp; Jerry",
+        "Main paragraph.\nSubscribe to our newsletter\nNext paragraph.",
+        "We use cookies to improve your experience\nThe article starts here.",
+        "Share\nThe story begins.",
+        "Image: A chart showing revenue growth.\nRevenue increased in Q2.",
+        "Figure 2 shows revenue growth.",
+    ]
+    var idempotent = true
+    for input in inputs {
+        let once = TextCleanup.clean(input).text
+        let twice = TextCleanup.clean(once).text
+        if once != twice { idempotent = false }
+    }
+    expect(idempotent, "clean(clean(x)) == clean(x) for every fixture")
 }
 
 print("")

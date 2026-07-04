@@ -15,10 +15,10 @@ by the reader. It covers:
 It does not define text cleanup, phrase chunking, function-word grouping, phrase
 pivots, rendering, persistence migration, or application UI.
 
-**Status:** focused implementation draft; the rule tables are complete and await
-acceptance. The implementation remains Foundation-only and does not use
-`NaturalLanguage`, locale-sensitive segmentation, regular expressions, or
-probabilistic rules.
+**Status:** implemented. `Tokenizer` emits explicit boundaries and the full
+CoreChecks matrix below is green. The implementation remains Foundation-only and
+does not use `NaturalLanguage`, locale-sensitive segmentation, regular
+expressions, or probabilistic rules.
 
 ---
 
@@ -195,6 +195,14 @@ An ellipsis is either the single character `…` or a closer-skipped trailing ru
 of at least two periods. It always receives the 2.0 rest; lookahead determines
 whether its boundary is `.sentence` or `.clause`.
 
+Decimals need no dedicated rule or detector. Classification only inspects a
+token's trailing character after skipping closers, so a bare decimal such as
+`3.14` carries no trailing terminal mark and resolves to `.none`, while `3.14.`
+ends in an ordinary period and resolves to `.sentence` (or `.paragraph` when
+paragraph-final) through the ordinary-period rule. A trailing run of two or more
+periods such as `3.14...` is an ellipsis by the rule above. The internal period
+of a decimal is never examined, so no separate decimal detector is required.
+
 ---
 
 ## Sentence-index algorithm
@@ -263,9 +271,17 @@ applicable:
 | `He left. 40 remained.` | ordinary period is `.sentence` before a digit |
 | `done. next here` | ordinary period remains `.sentence` before lowercase |
 | `alpha beta\n\ngamma` | `beta` is `.paragraph`; `gamma` has next sentence index |
+| `"Dr." Smith arrived.` | closer-stripped `"Dr."` is `.none`; `arrived.` is `.paragraph` |
+| `"etc." The next sentence` | closer-stripped `"etc."` is `.sentence` before uppercase |
+| `state-of-the-art model shipped.` | hyphenated term is `.none`; an ordinary hyphen is not a clause dash |
+| `alpha—beta shipped.` | internal em dash makes `alpha—beta` a `.clause` |
+| `The value was 3.14. Then left.` | `3.14.` is `.sentence`; a bare `3.14` would be `.none` |
 
 As a repository audit, verify that application code does not infer pause kind
-from multiplier thresholds.
+from multiplier thresholds. At this writing the app is already clean: the only
+`delayMultiplier` comparisons live in `Sources/CoreChecks/main.swift`, and
+`ReaderViewModel.nextGlideMultiplier()` governs resume glide, not boundaries.
+Preserve this by reading the explicit `boundary` wherever pause kind is needed.
 
 ---
 
